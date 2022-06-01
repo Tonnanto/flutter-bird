@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class Bird extends StatelessWidget {
@@ -11,7 +13,7 @@ class Bird extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       // color: Colors.red,
       width: size,
       height: size,

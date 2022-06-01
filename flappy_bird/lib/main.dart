@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flappy_bird/services/persistence/persistence_service.dart';
 import 'package:flappy_bird/views/bird.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pixel_border/pixel_border.dart';
 
 import 'views/background.dart';
+import 'views/flappy_text.dart';
 import 'views/pipe.dart';
 
 void main() {
@@ -23,21 +26,26 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flappy Bird'),
+      home: const DefaultTextStyle(
+          style: TextStyle(
+
+          ),
+          child: FlutterBird(title: 'Flappy Bird')
+      ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class FlutterBird extends StatefulWidget {
+  const FlutterBird({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<FlutterBird> createState() => _FlutterBirdState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _FlutterBirdState extends State<FlutterBird> {
 
   static int ticksPerPipe = 50;
   static int speed = 100;
@@ -47,7 +55,9 @@ class _MyHomePageState extends State<MyHomePage> {
   double jumpTime = 0;
   double initialJumpHeight = 0;
   double jumpHeight = 0;
+  double jumpDirection = 0;
   int score = 0;
+  int? highScore;
 
   Timer? timer;
   int lastPipe = 0;
@@ -60,6 +70,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    PersistenceService.instance.getHighScore().then((value) => setState(() {
+      if (value != null) highScore = value;
+    }));
   }
 
   /// Start game loop
@@ -69,16 +82,17 @@ class _MyHomePageState extends State<MyHomePage> {
     timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
       jumpTime += 0.025;
       jumpHeight = -4.4 * jumpTime * jumpTime + 2.5 * jumpTime;
+      jumpDirection = -8.8 * jumpTime + 2.5;
       setState(() {
         birdY = initialJumpHeight - jumpHeight;
       });
-      if (_isBirdDead()) {
-        _gameOver();
-      }
       _updatePipes();
       int newScore = (timer.tick - max(speed - ticksPerPipe, 5)) ~/ ticksPerPipe;
       if (newScore != score && newScore > 0) {
         setState(() { score = newScore; });
+      }
+      if (_isBirdDead()) {
+        _gameOver();
       }
     });
   }
@@ -86,6 +100,10 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Game Over Sequence
   _gameOver() {
     timer?.cancel();
+    if (score > (highScore ?? 0)) {
+      PersistenceService.instance.saveHighScore(score);
+      highScore = score;
+    }
     Timer(const Duration(milliseconds: 1000), () {
       setState(() {
         timer = null;
@@ -101,6 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _jump(TapDownDetails _) {
+    HapticFeedback.selectionClick();
     if (!playing) {
       _start();
       return;
@@ -183,8 +202,21 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           const Spacer(flex: 1,),
           _buildTitle(),
+          if (score != 0)
+            const SizedBox(height: 24,),
+          if (score != 0)
+            FlappyText(
+              text: "$score",
+            ),
           const Spacer(flex: 4,),
           _buildPlayButton(),
+          const SizedBox(height: 24,),
+          if (highScore != null)
+            FlappyText(
+              fontSize: 32,
+              strokeWidth: 2.8,
+              text: "High Score $highScore",
+            ),
           const Spacer(flex: 1,),
         ],
       )),
@@ -194,17 +226,9 @@ class _MyHomePageState extends State<MyHomePage> {
     ],
   );
 
-  Widget _buildTitle() => const Text(
-    "Flutter Bird",
-    style: TextStyle(
-        fontFamily: 'flappy',
-        color: Colors.white,
-        shadows: [
-          Shadow(
-            offset: Offset(3, 3)
-          )
-        ]
-    ),
+  Widget _buildTitle() => const FlappyText(
+    fontSize: 72,
+    text: "FlutterBird",
   );
 
   Widget _buildPlayButton() => Container(
@@ -242,7 +266,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 0),
                   alignment: Alignment(0, birdY),
-                  child: Bird(key: birdKey ,size: worldDimensions.height / 10,),
+                  child: Transform.rotate(angle: pi / 4 * (-jumpDirection / 4), child: Bird(key: birdKey, size: worldDimensions.height / 10,))
                 ))
           ],
         ),
@@ -275,17 +299,8 @@ class _MyHomePageState extends State<MyHomePage> {
             Column(
               children: [
                 const Spacer(flex: 1,),
-                Text(
-                  score.toString(),
-                  style: const TextStyle(
-                      fontFamily: 'flappy',
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                            offset: Offset(3, 3)
-                        )
-                      ]
-                  ),
+                FlappyText(
+                  text: score.toString(),
                 ),
                 const Spacer(flex: 6,),
               ],
