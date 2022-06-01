@@ -2,13 +2,18 @@
 import 'package:flutter/material.dart';
 
 class Bird extends StatelessWidget {
-  const Bird({Key? key}) : super(key: key);
+  const Bird({
+    Key? key,
+    required this.size
+  }) : super(key: key);
+
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 72,
-      height: 72,
+      width: size,
+      height: size,
       child: Image.asset(
         "assets/images/flappy_bird.png"
       ),

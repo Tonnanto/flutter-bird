@@ -39,7 +39,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  static int ticksPerPipe = 88;
+  static int ticksPerPipe = 50;
+  static int speed = 100;
 
   bool playing = false;
   double birdY = 0;
@@ -53,13 +54,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Pipe> pipes = [];
 
+  late Size worldDimensions;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   /// Start game loop
   _start() {
     score = 0;
     playing = true;
     timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
       jumpTime += 0.025;
-      jumpHeight = -4.9 * jumpTime * jumpTime + 3 * jumpTime;
+      jumpHeight = -4.4 * jumpTime * jumpTime + 2.5 * jumpTime;
       setState(() {
         birdY = initialJumpHeight - jumpHeight;
       });
@@ -68,9 +76,10 @@ class _MyHomePageState extends State<MyHomePage> {
         _gameOver();
       }
       _updatePipes();
-      setState(() {
-        score = (timer.tick - 30) ~/ ticksPerPipe;
-      });
+      int newScore = (timer.tick - max(speed - ticksPerPipe, 5)) ~/ ticksPerPipe;
+      if (newScore != score && newScore > 0) {
+        setState(() { score = newScore; });
+      }
     });
   }
 
@@ -100,17 +109,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _updatePipes() {
     if (timer == null) return;
-    if (timer!.tick + 100 - lastPipe > ticksPerPipe) {
+    if (timer!.tick + speed - lastPipe > ticksPerPipe) {
       // New Pipe
       double height = -0.9 + 1.8 * Random().nextDouble();
       pipes.add(Pipe(
         height: height,
-        passTick: timer!.tick + 100,
+        passTick: timer!.tick + speed,
+        worldDimensions: worldDimensions,
       ));
-      lastPipe = timer!.tick + 100;
+      lastPipe = timer!.tick + speed;
 
       // Remove pipe that has passed
-      if (pipes.length > 3) {
+      if (pipes.length > 2 * speed / ticksPerPipe && pipes.length > 3) {
         pipes.removeAt(0);
       }
     }
@@ -124,23 +134,36 @@ class _MyHomePageState extends State<MyHomePage> {
     // Hits barrier
     // TODO
 
+
     return false;
   }
 
   @override
   Widget build(BuildContext context) {
+
+    Size screenDimensions = MediaQuery.of(context).size;
+    double maxWidth = screenDimensions.height * 3 / 4 / 1.3;
+    worldDimensions = Size(min(maxWidth, screenDimensions.width), screenDimensions.height * 3 / 4);
+
     return GestureDetector(
       onTapDown: _jump,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          const Background(),
-          _buildBird(),
-          if (playing)
-            Positioned.fill(child: _buildGameCanvas()),
-          if (!playing)
-            _buildMenu(),
-        ]
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: maxWidth
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              const Background(),
+              _buildBird(),
+              if (playing)
+                Positioned.fill(child: _buildGameCanvas()),
+              if (!playing)
+                _buildMenu(),
+            ]
+          ),
+        ),
       ),
     );
   }
@@ -211,7 +234,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 0),
                   alignment: Alignment(0, birdY),
-                  child: const Bird(),
+                  child: Bird(size: worldDimensions.height / 10,),
                 ))
           ],
         ),
@@ -235,7 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ...pipes.map((element) {
                 return AnimatedContainer(
                     duration: const Duration(milliseconds: 0),
-                    alignment: Alignment((element.passTick - timer!.tick) * 0.02, 0),
+                    alignment: Alignment((element.passTick - timer!.tick) * 3 / speed, 0),
                     child: element
                 );
               }).toList(),

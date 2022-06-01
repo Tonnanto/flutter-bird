@@ -8,14 +8,17 @@ class Pipe extends StatelessWidget {
     Key? key,
     this.height = 1,
     required this.passTick,
+    required this.worldDimensions,
   }) : super(key: key);
 
-  // In pixel
-  static double width = 55;
   // Value between 0 and 2
-  final double space = 0.8;
+  static double width = 0.25;
+  // Value between 0 and 2
+  final double space = 0.7;
   // Value between -1.0 and 1.0
   final double height;
+
+  final Size worldDimensions;
 
   // Game tick on which this pipe is passed
   final int passTick;
@@ -26,15 +29,14 @@ class Pipe extends StatelessWidget {
     double height = max(this.height, -0.9 + space / 2);
     height = min(height, 0.9 - space / 2);
 
-    double totalHeight = MediaQuery.of(context).size.height * 3 / 4;
-    double pixelSpace = totalHeight / (2 / space);
-    double topHeight = (height + 1) * 0.5 * totalHeight;
-    double bottomHeight = totalHeight - topHeight;
+    double pixelSpace = worldDimensions.height / (2 / space);
+    double topHeight = (height + 1) * 0.5 * worldDimensions.height;
+    double bottomHeight = worldDimensions.height - topHeight;
     topHeight -= 0.5 * pixelSpace;
     bottomHeight -= 0.5 * pixelSpace;
 
     return SizedBox(
-      width: width,
+      width: worldDimensions.width / (2 / width),
       child: Column(
           children: [
             Container(
