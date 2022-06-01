@@ -55,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Pipe> pipes = [];
 
   late Size worldDimensions;
+  final GlobalKey birdKey = GlobalKey();
 
   @override
   void initState() {
@@ -72,7 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
         birdY = initialJumpHeight - jumpHeight;
       });
       if (_isBirdDead()) {
-        timer.cancel();
         _gameOver();
       }
       _updatePipes();
@@ -85,15 +85,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Game Over Sequence
   _gameOver() {
-    setState(() {
-      timer = null;
-      lastPipe = 0;
-      pipes = [];
-      birdY = 0;
-      jumpTime = 0;
-      initialJumpHeight = 0;
-      playing = false;
+    timer?.cancel();
+    Timer(const Duration(milliseconds: 1000), () {
+      setState(() {
+        timer = null;
+        lastPipe = 0;
+        pipes = [];
+        birdY = 0;
+        jumpTime = 0;
+        initialJumpHeight = 0;
+        playing = false;
+      });
     });
+
   }
 
   _jump(TapDownDetails _) {
@@ -133,7 +137,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Hits barrier
     // TODO
-
+    for (Pipe pipe in pipes) {
+      if (pipe.checkCollision(birdKey)) {
+        return true;
+      }
+    }
 
     return false;
   }
@@ -234,7 +242,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 0),
                   alignment: Alignment(0, birdY),
-                  child: Bird(size: worldDimensions.height / 10,),
+                  child: Bird(key: birdKey ,size: worldDimensions.height / 10,),
                 ))
           ],
         ),

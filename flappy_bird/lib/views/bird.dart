@@ -11,7 +11,8 @@ class Bird extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      // color: Colors.red,
       width: size,
       height: size,
       child: Image.asset(
