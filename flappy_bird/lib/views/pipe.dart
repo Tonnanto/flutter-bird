@@ -22,6 +22,8 @@ class Pipe extends StatelessWidget {
 
   // Game tick on which this pipe is passed
   final int passTick;
+  // Flag indicating whether this pipe has already scored a point
+  // bool passed = false;
 
   final GlobalKey topPipeKey = GlobalKey();
   final GlobalKey bottomPipeKey = GlobalKey();

@@ -15,7 +15,7 @@ class Bird extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       // color: Colors.red,
-      width: size,
+      // width: size,
       height: size,
       child: Image.asset(
         "assets/images/flappy_bird.png"

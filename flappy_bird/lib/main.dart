@@ -47,7 +47,9 @@ class FlutterBird extends StatefulWidget {
 
 class _FlutterBirdState extends State<FlutterBird> {
 
+  // ticks between two pipes (smaller -> more pipes)
   static int ticksPerPipe = 50;
+  // ticks until a spawned pipe reaches bird (smaller -> faster)
   static int speed = 100;
 
   bool playing = false;
@@ -55,14 +57,19 @@ class _FlutterBirdState extends State<FlutterBird> {
   double jumpTime = 0;
   double initialJumpHeight = 0;
   double jumpHeight = 0;
+  // inclination of jump used for bird rotation
   double jumpDirection = 0;
   int score = 0;
   int? highScore;
 
+  // game loop timer
   Timer? timer;
+  // tick of the last pipe that spawned
   int lastPipe = 0;
 
   List<Pipe> pipes = [];
+  // used to determine when points are gained
+  List<int> upcomingPipeTicks = [];
 
   late Size worldDimensions;
   final GlobalKey birdKey = GlobalKey();
@@ -80,17 +87,25 @@ class _FlutterBirdState extends State<FlutterBird> {
     score = 0;
     playing = true;
     timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+
+      // render bird
       jumpTime += 0.025;
       jumpHeight = -4.4 * jumpTime * jumpTime + 2.5 * jumpTime;
       jumpDirection = -8.8 * jumpTime + 2.5;
       setState(() {
         birdY = initialJumpHeight - jumpHeight;
       });
+
+      // render pipes
       _updatePipes();
-      int newScore = (timer.tick - max(speed - ticksPerPipe, 5)) ~/ ticksPerPipe;
-      if (newScore != score && newScore > 0) {
-        setState(() { score = newScore; });
+
+      // update score
+      if (upcomingPipeTicks.first < timer.tick) {
+        upcomingPipeTicks.removeAt(0);
+        setState(() { ++score; });
       }
+
+      // check for collisions
       if (_isBirdDead()) {
         _gameOver();
       }
@@ -105,6 +120,7 @@ class _FlutterBirdState extends State<FlutterBird> {
       highScore = score;
     }
     Timer(const Duration(milliseconds: 1000), () {
+      jumpDirection = 0;
       setState(() {
         timer = null;
         lastPipe = 0;
@@ -112,6 +128,7 @@ class _FlutterBirdState extends State<FlutterBird> {
         birdY = 0;
         jumpTime = 0;
         initialJumpHeight = 0;
+        upcomingPipeTicks = [];
         playing = false;
       });
     });
@@ -132,15 +149,17 @@ class _FlutterBirdState extends State<FlutterBird> {
 
   _updatePipes() {
     if (timer == null) return;
-    if (timer!.tick + speed - lastPipe > ticksPerPipe) {
+    if (timer!.tick + speed - lastPipe >= ticksPerPipe) {
       // New Pipe
       double height = -0.9 + 1.8 * Random().nextDouble();
+      int pipeTick = timer!.tick + speed;
       pipes.add(Pipe(
         height: height,
-        passTick: timer!.tick + speed,
+        passTick: pipeTick,
         worldDimensions: worldDimensions,
       ));
-      lastPipe = timer!.tick + speed;
+      upcomingPipeTicks.add(pipeTick);
+      lastPipe = pipeTick;
 
       // Remove pipe that has passed
       if (pipes.length > 2 * speed / ticksPerPipe && pipes.length > 3) {
@@ -155,7 +174,6 @@ class _FlutterBirdState extends State<FlutterBird> {
     if (birdY > 1.1 || birdY < -1.5) return true;
 
     // Hits barrier
-    // TODO
     for (Pipe pipe in pipes) {
       if (pipe.checkCollision(birdKey)) {
         return true;
@@ -266,7 +284,7 @@ class _FlutterBirdState extends State<FlutterBird> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 0),
                   alignment: Alignment(0, birdY),
-                  child: Transform.rotate(angle: pi / 4 * (-jumpDirection / 4), child: Bird(key: birdKey, size: worldDimensions.height / 10,))
+                  child: Transform.rotate(angle: pi / 4 * (-jumpDirection / 4), child: Bird(key: birdKey, size: worldDimensions.height / 18,))
                 ))
           ],
         ),
