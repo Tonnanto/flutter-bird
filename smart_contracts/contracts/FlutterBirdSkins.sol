@@ -3,47 +3,52 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract FlutterBirdSkins is ERC721URIStorage {
+  using Counters for Counters.Counter;
+  Counters.Counter private _tokenIds;
+
   address public owner = msg.sender;
   uint public last_completed_migration;
-  uint256 tokenCounter;
 
   // Bird Breeds
-  enum Breed{
+  enum Breed {
     FABY,
     TUCAN,
     PARROT,
     PIGEON
   }
 
+  // Bird Colors
+  enum Color {
+    YELLOW,
+    RED,
+    GREEN,
+    BLUE,
+    PINK
+  }
+
   // Mappings
-  mapping(uint256 => Breed) tokenIdToBreed;
+  mapping(uint256 => uint) public tokenIdToBreed;
+  mapping(uint256 => uint) public tokenIdToColor;
 
   // Events
   event createdCollectible(uint256 indexed tokenId);
 
-  constructor() ERC721("FlutterBirdSkins", "FBS") {
-    tokenCounter = 1;
-  }
-
-  modifier restricted() {
-    require(
-      msg.sender == owner,
-      "This function is restricted to the contract's owner"
-    );
-    _;
-  }
-
-  function setCompleted(uint completed) public restricted {
-    last_completed_migration = completed;
-  }
+  constructor() ERC721("FlutterBirdSkins", "FBS") {}
 
   function createCollectible() public {
     // 1. Get next token Id
-    uint256 newTokenId = tokenCounter;
+    uint256 newTokenId = _tokenIds.current();
 
-    // 2. Set random breed
+    // TODO: Get random number from Chainlink VRF
+
+    // 2. Set random breed and color
+    Breed breed = Breed(newTokenId % 4);
+    Color color = Color(newTokenId % 5);
+    tokenIdToBreed[newTokenId] = uint(breed);
+    tokenIdToColor[newTokenId] = uint(color);
 
     // 3. safe mint
     super._safeMint(msg.sender, newTokenId);
@@ -52,10 +57,14 @@ contract FlutterBirdSkins is ERC721URIStorage {
     super._setTokenURI(newTokenId, Strings.toString(newTokenId));
 
     // 5. Increase token counter
-    tokenCounter++;
+    _tokenIds.increment();
 
     // 6. Emit Event
     emit createdCollectible(newTokenId);
+  }
+
+  function getNumberOfSkins() public view returns (uint256) {
+    return _tokenIds._value;
   }
 
 //  function setTokenUri(uint256 tokenId, string memory _tokenURI) public {

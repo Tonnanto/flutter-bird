@@ -1,0 +1,136 @@
+{
+  "bird": [
+    {
+      "name": "yellow",
+      "weight": 5
+    },
+    {
+      "name": "blue",
+      "weight": 2
+    },
+    {
+      "name": "green",
+      "weight": 2
+    },
+    {
+      "name": "red",
+      "weight": 2
+    },
+    {
+      "name": "cyan",
+      "weight": 1
+    },
+    {
+      "name": "orange",
+      "weight": 1
+    },
+    {
+      "name": "pink",
+      "weight": 1
+    },
+    {
+      "name": "purple",
+      "weight": 1
+    },
+    {
+      "name": "black",
+      "weight": 0.5
+    },
+    {
+      "name": "white",
+      "weight": 0.5
+    },
+    {
+      "name": "rainbow",
+      "weight": 0.2
+    },
+    {
+      "name": "gold",
+      "weight": 0.1
+    }
+  ],
+  "head": [
+    {
+      "name": "none",
+      "weight": 5
+    },
+    {
+      "name": "beanie",
+      "weight": 1
+    },
+    {
+      "name": "bucket_hat",
+      "weight": 1
+    },
+    {
+      "name": "cap_blue",
+      "weight": 0.5
+    },
+    {
+      "name": "cap_red",
+      "weight": 0.5
+    },
+    {
+      "name": "cowboy",
+      "weight": 1
+    },
+    {
+      "name": "crown",
+      "weight": 0.1
+    },
+    {
+      "name": "headphones_blue",
+      "weight": 0.3
+    },
+    {
+      "name": "headphones_gray",
+      "weight": 0.3
+    },
+    {
+      "name": "headphones_green",
+      "weight": 0.3
+    },
+    {
+      "name": "headphones_orange",
+      "weight": 0.3
+    },
+    {
+      "name": "headphones_red",
+      "weight": 0.3
+    },
+    {
+      "name": "party",
+      "weight": 0.5
+    },
+    {
+      "name": "wizard",
+      "weight": 0.5
+    }
+  ],
+  "accessory": [
+    {
+      "name": "none",
+      "weight": 10
+    },
+    {
+      "name": "cigarette",
+      "weight": 1
+    },
+    {
+      "name": "copper_chain",
+      "weight": 4
+    },
+    {
+      "name": "silver_chain",
+      "weight": 2
+    },
+    {
+      "name": "gold_chain",
+      "weight": 1
+    },
+    {
+      "name": "thug_glasses",
+      "weight": 2
+    }
+  ]
+}
