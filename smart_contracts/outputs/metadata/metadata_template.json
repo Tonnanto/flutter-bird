@@ -4,11 +4,15 @@
   "image": "",
   "attributes": [
     {
-      "trait_type": "breed",
+      "trait_type": "color",
       "value": ""
     },
     {
-      "trait_type": "color",
+      "trait_type": "accessory",
+      "value": ""
+    },
+    {
+      "trait_type": "headgear",
       "value": ""
     }
   ]

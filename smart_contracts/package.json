@@ -6,5 +6,8 @@
   },
   "scripts": {
     "test": "jest"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0"
   }
 }

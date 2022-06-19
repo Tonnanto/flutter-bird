@@ -2,36 +2,17 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract FlutterBirdSkins is ERC721URIStorage {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
 
+  // Assign owner on contract creation
   address public owner = msg.sender;
-  uint public last_completed_migration;
 
-  // Bird Breeds
-  enum Breed {
-    FABY,
-    TUCAN,
-    PARROT,
-    PIGEON
-  }
-
-  // Bird Colors
-  enum Color {
-    YELLOW,
-    RED,
-    GREEN,
-    BLUE,
-    PINK
-  }
-
-  // Mappings
-  mapping(uint256 => uint) public tokenIdToBreed;
-  mapping(uint256 => uint) public tokenIdToColor;
+  // Token DNA contains traits encoded in a bitfield
+  mapping(uint256 => uint8) public tokenIdToDna;
 
   // Events
   event createdCollectible(uint256 indexed tokenId);
@@ -42,24 +23,16 @@ contract FlutterBirdSkins is ERC721URIStorage {
     // 1. Get next token Id
     uint256 newTokenId = _tokenIds.current();
 
-    // TODO: Get random number from Chainlink VRF
-
-    // 2. Set random breed and color
-    Breed breed = Breed(newTokenId % 4);
-    Color color = Color(newTokenId % 5);
-    tokenIdToBreed[newTokenId] = uint(breed);
-    tokenIdToColor[newTokenId] = uint(color);
-
-    // 3. safe mint
+    // 2. safe mint
     super._safeMint(msg.sender, newTokenId);
 
-    // 4. assign token URI
-    super._setTokenURI(newTokenId, Strings.toString(newTokenId));
+    // 3. assign token URI
+    super._setTokenURI(newTokenId, "Metadata not yet generated");
 
-    // 5. Increase token counter
+    // 4. Increase token counter
     _tokenIds.increment();
 
-    // 6. Emit Event
+    // 5. Emit Event
     emit createdCollectible(newTokenId);
   }
 
