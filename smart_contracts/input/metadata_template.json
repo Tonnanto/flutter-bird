@@ -1,0 +1,27 @@
+{
+  "name": "",
+  "description": "",
+  "image": "",
+  "attributes": [
+    {
+      "trait_type": "color",
+      "value": ""
+    },
+    {
+      "trait_type": "head",
+      "value": ""
+    },
+    {
+      "trait_type": "eyes",
+      "value": ""
+    },
+    {
+      "trait_type": "mouth",
+      "value": ""
+    },
+    {
+      "trait_type": "neck",
+      "value": ""
+    }
+  ]
+}
