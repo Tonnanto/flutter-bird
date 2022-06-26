@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flappy_bird/services/persistence/persistence_service.dart';
+import 'package:flappy_bird/services/web3_provider.dart';
 import 'package:flappy_bird/views/bird.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pixel_border/pixel_border.dart';
+import 'package:provider/provider.dart';
 
 import 'views/background.dart';
 import 'views/flappy_text.dart';
@@ -21,16 +23,21 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flappy Bird',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const DefaultTextStyle(
-          style: TextStyle(
+    return ChangeNotifierProvider<Web3Provider>(
+      create: (BuildContext context) {
+        return Web3Provider()..init();
+      },
+      child: MaterialApp(
+        title: 'Flappy Bird',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const DefaultTextStyle(
+            style: TextStyle(
 
-          ),
-          child: FlutterBird(title: 'Flappy Bird')
+            ),
+            child: FlutterBird(title: 'Flappy Bird')
+        ),
       ),
     );
   }
@@ -190,30 +197,38 @@ class _FlutterBirdState extends State<FlutterBird> {
     double maxWidth = screenDimensions.height * 3 / 4 / 1.3;
     worldDimensions = Size(min(maxWidth, screenDimensions.width), screenDimensions.height * 3 / 4);
 
-    return GestureDetector(
-      onTapDown: _jump,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: maxWidth
+    return Consumer<Web3Provider>(
+      builder: (context, web3Provider, child) {
+
+
+
+
+        return GestureDetector(
+          onTapDown: _jump,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxWidth: maxWidth
+              ),
+              child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const Background(),
+                    _buildBird(),
+                    if (playing)
+                      Positioned.fill(child: _buildGameCanvas()),
+                    if (!playing)
+                      _buildMenu(web3Provider),
+                  ]
+              ),
+            ),
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Background(),
-              _buildBird(),
-              if (playing)
-                Positioned.fill(child: _buildGameCanvas()),
-              if (!playing)
-                _buildMenu(),
-            ]
-          ),
-        ),
-      ),
+        );
+      }
     );
   }
 
-  Widget _buildMenu() => Column(
+  Widget _buildMenu(Web3Provider web3Provider) => Column(
     children: [
       Expanded(flex: 3,
         child: Column(
@@ -239,7 +254,7 @@ class _FlutterBirdState extends State<FlutterBird> {
         ],
       )),
       Expanded(flex: 1,
-        child: Container(),
+        child: _buildWeb3View(web3Provider),
       )
     ],
   );
@@ -295,6 +310,28 @@ class _FlutterBirdState extends State<FlutterBird> {
       )
     ],
   );
+
+  _buildWeb3View(Web3Provider web3provider) {
+
+    String statusText = "";
+
+    if (web3provider.isAuthenticated && web3provider.isOnOperatingChain) {
+
+    }
+
+    return Column(
+      children: [
+        TextButton(
+          onPressed: () {
+            web3provider.walletConnect();
+          },
+          child: const Text(
+            "Connect",
+          ),
+        )
+      ],
+    );
+  }
 
   Widget _buildGameCanvas() => Column(
     children: [

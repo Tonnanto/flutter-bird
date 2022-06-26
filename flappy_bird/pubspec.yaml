@@ -31,11 +31,14 @@ dependencies:
     sdk: flutter
 
   pixel_border: ^2.0.0-nullsafety.1
-
+  web3dart: ^2.4.0
+  walletconnect_dart: ^0.0.11
+  url_launcher: ^6.1.4
+  provider: ^6.0.3
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+#  flutter_test:
+#    sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

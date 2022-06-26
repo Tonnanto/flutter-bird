@@ -43,8 +43,11 @@ function generateMetadata(tokenId) {
 
     // Generate random metadata
     const skinTemplate = require('../input/metadata_template.json');
+
+    // Clone object
     const skinMetadata = Object.assign({}, JSON.parse(JSON.stringify(skinTemplate)));
 
+    // Make at least one trait guaranteed
     const guaranteedTrait = Math.floor(Math.random() * 4)
 
     const birdList = traits.bird;
