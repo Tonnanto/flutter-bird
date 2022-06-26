@@ -74,11 +74,16 @@ class Pipe extends StatelessWidget {
     if (bird == null || topPipe == null || bottomPipe == null) return false;
 
     Size birdSize = bird.paintBounds.size;
-    birdSize = Size(birdSize.width * 0.7, birdSize.height * 0.7);
+
+    double birdOffsetY = birdSize.height * 12 / 30;
+    double birdOffsetX = birdSize.width * 7 / 30;
+    double birdDrawingHeight = birdSize.height * 12 / 30;
+    double birdDrawingWidth = birdSize.width * 17 / 30;
+    birdSize = Size(birdDrawingWidth, birdDrawingHeight);
     final topPipeSize = topPipe.paintBounds.size;
     final bottomPipeSize = bottomPipe.paintBounds.size;
 
-    final birdPosition = bird.localToGlobal(Offset.zero);
+    final birdPosition = bird.localToGlobal(Offset(birdOffsetX, birdOffsetY));//Offset.zero);
     final topPipePosition = topPipe.localToGlobal(Offset.zero);
     final bottomPipePosition = bottomPipe.localToGlobal(Offset.zero);
 

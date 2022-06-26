@@ -53,33 +53,37 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
 
   bool playing = false;
 
-  int? lastScore;
+  int lastScore = 0;
   int? highScore;
 
   late Size worldDimensions;
   late double birdSize;
 
-  late final PageController birdSelectorController = PageController(viewportFraction: 0.25);
-  late final GlobalKey birdSelectorKey = GlobalKey();
+  final PageController birdSelectorController = PageController(viewportFraction: 0.3);
   List<Bird> birds = [
     const Bird(),
+    const Bird(imagePath: "images/img_3.png", name: "Bird #3475",),
+    const Bird(imagePath: "images/img_4.png", name: "Bird #420",),
+    const Bird(imagePath: "images/img_5.png", name: "Bird #6549",),
+    const Bird(imagePath: "images/img_6.png", name: "Bird #4794",),
     const Bird(imagePath: "images/hipster_bird.png", name: "Bird #34",),
     const Bird(imagePath: "images/img.png", name: "Bird #867",),
     const Bird(imagePath: "images/img_1.png", name: "Bird #4598",),
     const Bird(imagePath: "images/img_2.png", name: "Bird #1245",),
   ];
   late int selectedBird = 0;
+  double? scrollPosition;
 
   @override
   void initState() {
     super.initState();
-    // birdSelectorController = PageController(viewportFraction: 0.25, keepPage: true, initialPage: 0);
     PersistenceService.instance.getHighScore().then((value) => setState(() {
       if (value != null) highScore = value;
     }));
   }
 
   _startGame() {
+    HapticFeedback.lightImpact();
     Navigator.of(context).push(PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => FlutterBirdGame(
           bird: birds[selectedBird],
@@ -91,13 +95,10 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
               PersistenceService.instance.saveHighScore(score);
               highScore = score;
             }
-            setState(() {
-
-            });
+            setState(() {});
           }),
     ));
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -205,16 +206,31 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
           children: [
             const Spacer(),
             SizedBox(
-              height: birdSize,
-              child: PageView(
-                controller: birdSelectorController,
-                onPageChanged: (page) {
-                  HapticFeedback.selectionClick();
+              height: birdSize * 1.5,
+              child: NotificationListener<ScrollUpdateNotification>(
+                onNotification: (notification) {
                   setState(() {
-                    selectedBird = page;
+                    scrollPosition = birdSelectorController.page;
                   });
+                  return true;
                 },
-                children: birds.map((bird) => Center(child: Container(color: Colors.white, height: birdSize, width: birdSize, child: bird,))).toList(),
+                child: PageView.builder(
+                  controller: birdSelectorController,
+                  onPageChanged: (page) {
+                    HapticFeedback.selectionClick();
+                    setState(() {
+                      selectedBird = page;
+                    });
+                  },
+                  itemCount: birds.length,
+                  itemBuilder: (context, index) {
+                    double scale = 1;
+                    if (scrollPosition != null) {
+                      scale = max(1, (1.5 - (index - scrollPosition!).abs()) + birdSelectorController.viewportFraction);
+                    }
+                    return Center(child: SizedBox(height: birdSize * scale, width: birdSize * scale, child: birds[index],));
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 16,),
