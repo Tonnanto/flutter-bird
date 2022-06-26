@@ -1,47 +1,31 @@
 
 
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
-import 'package:web3dart/web3dart.dart';
 
 class Web3Provider extends ChangeNotifier {
   static const int operatingChain = 4; // Rinkeby?
-  String? currentAccountAddress;
-  int? currentChain;
 
   // Create a connector
-  late final WalletConnect connector;
-  SessionStatus? session;
+  WalletConnect? connector;
+  SessionStatus? sessionStatus;
 
-  bool get isConnected => connector.connected;
+  String? get currentAccountAddress => connector?.session.accounts.first;
+  String? get currentAddressShort => "${currentAccountAddress?.substring(0, 8)}...${currentAccountAddress?.substring(36)}";
+  int? get currentChain => connector?.session.chainId;
+  bool get isConnected => connector?.connected ?? false;
   bool get isOnOperatingChain => currentChain == operatingChain;
   bool get isAuthenticated => isConnected && currentAccountAddress != null;
 
+  // The data to display in a QR Code for connections on Desktop / Browser.
+  String? webQrData;
+
   init() {
 
-    // Create WalletConnect Connector
-    connector = WalletConnect(
-      bridge: 'https://bridge.walletconnect.org',
-      clientMeta: const PeerMeta(
-        name: 'WalletConnect',
-        description: 'WalletConnect Developer App',
-        url: 'https://walletconnect.org',
-        icons: [
-          'https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media'
-        ],
-      ),
-    );
-    //
-    //
-    //
-    // // Subscribe to events
-    // connector.on('connect', (session) => print('connected: ' + session.toString()));
-    // connector.on('session_update', (payload) => print('connected: ' + payload.toString()));
-    // connector.on('disconnect', (session) => print('connected: ' + session.toString()));
-    //
-    //
+
+
+
     // // Approve session
     // connector.approveSession(chainId: 4160, accounts: ['0x4292...931B3']);
 
@@ -63,25 +47,32 @@ class Web3Provider extends ChangeNotifier {
     // }
   }
 
+  /// Prompts user to authenticate with a wallet
   walletConnect() async {
 
-    // Subscribe to events
-    connector.on('connect', (session) => print(session));
-    connector.on('session_update', (payload) => print(payload));
-    connector.on('disconnect', (session) => print(session));
+    // Create fresh connector
+    _createConnector();
 
     // Create a new session
-    if (!connector.connected) {
-      session = await connector.createSession(
-          chainId: 43113,
-          onDisplayUri: (uri) async => { print('onDisplayUri: ' + uri), await launchUrlString(uri)});
+    if (!isConnected) {
+      sessionStatus = await connector?.createSession(
+          chainId: 1,
+          onDisplayUri: (uri) async {
+            // Launches Wallet App (Metamask)
+            if (kIsWeb) {
+              webQrData = uri;
+              notifyListeners();
+            } else {
+              await launchUrlString(uri);
+            }
+          }
+      );
+
+      notifyListeners();
     }
 
-    // setState(() {
-    //   account = session.accounts[0];
-    // });
-    //
-    // if (account != null) {
+
+    // if (isAuthenticated) {
     //   final client = Web3Client(rpcUrl, Client());
     //   EthereumWalletConnectProvider provider =
     //   EthereumWalletConnectProvider(connector);
@@ -90,28 +81,44 @@ class Web3Provider extends ChangeNotifier {
     // }
   }
 
-  // /// Promtps user to authenticate with a wallet
-  // Future<void> authenticate() async {
-  //   if (!isEnabled) return;
-  //
-  //   // Get accounts from users wallet
-  //   List<String> accountAddresses = await ethereum!.requestAccount();
-  //
-  //   if (accountAddresses.isNotEmpty) {
-  //     currentAccountAddress = accountAddresses[0];
-  //   }
-  //
-  //   currentChain = await ethereum!.getChainId();
-  //
-  //   notifyListeners();
-  // }
-  //
-  // /// Resets current authentication status
-  // disconnect() {
-  //   currentAccountAddress = null;
-  //   currentChain = null;
-  //   notifyListeners();
-  // }
+  walletDisconnect() async {
+    await connector?.killSession();
+    connector = null;
+    webQrData = null;
+    notifyListeners();
+  }
 
+  /// Creates a WalletConnect Instance
+  _createConnector() {
+    // Create WalletConnect Connector
+    connector = WalletConnect(
+      bridge: 'https://bridge.walletconnect.org',
+      clientMeta: const PeerMeta(
+        name: 'Flutter Bird',
+        description: 'WalletConnect Developer App',
+        url: 'https://flutterbird.com',
+        icons: [
+          'https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media' // TODO
+        ],
+      ),
+    );
+
+    // Subscribe to events
+    connector?.on('connect', (session) {
+      print('connected: ' + session.toString());
+      webQrData = null;
+      notifyListeners();
+    });
+    connector?.on('session_update', (payload) {
+      print('session_update: ' + payload.toString());
+      webQrData = null;
+      notifyListeners();
+    });
+    connector?.on('disconnect', (session) {
+      print('disconnect: ' + session.toString());
+      webQrData = null;
+      notifyListeners();
+    });
+  }
 
 }

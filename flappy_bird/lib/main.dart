@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:flappy_bird/services/persistence/persistence_service.dart';
 import 'package:flappy_bird/services/web3_provider.dart';
 import 'package:flappy_bird/views/bird.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pixel_border/pixel_border.dart';
@@ -12,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'views/background.dart';
 import 'views/flappy_text.dart';
 import 'views/pipe.dart';
+import 'views/web3_popup.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,12 +35,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: const DefaultTextStyle(
-            style: TextStyle(
-
-            ),
-            child: FlutterBird(title: 'Flappy Bird')
-        ),
+        home: const FlutterBird(title: 'Flappy Bird'),
       ),
     );
   }
@@ -52,7 +50,7 @@ class FlutterBird extends StatefulWidget {
   State<FlutterBird> createState() => _FlutterBirdState();
 }
 
-class _FlutterBirdState extends State<FlutterBird> {
+class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClientMixin {
 
   // ticks between two pipes (smaller -> more pipes)
   static int ticksPerPipe = 50;
@@ -79,11 +77,24 @@ class _FlutterBirdState extends State<FlutterBird> {
   List<int> upcomingPipeTicks = [];
 
   late Size worldDimensions;
+  late double birdSize;
+
   final GlobalKey birdKey = GlobalKey();
+  late final PageController birdSelectorController = PageController(viewportFraction: 0.25);
+  late final GlobalKey birdSelectorKey = GlobalKey();
+  List<Bird> birds = [
+    const Bird(),
+    const Bird(imagePath: "images/hipster_bird.png", name: "Bird #34",),
+    const Bird(imagePath: "images/img.png", name: "Bird #867",),
+    const Bird(imagePath: "images/img_1.png", name: "Bird #4598",),
+    const Bird(imagePath: "images/img_2.png", name: "Bird #1245",),
+  ];
+  late int selectedBird = 0;
 
   @override
   void initState() {
     super.initState();
+    // birdSelectorController = PageController(viewportFraction: 0.25, keepPage: true, initialPage: 0);
     PersistenceService.instance.getHighScore().then((value) => setState(() {
       if (value != null) highScore = value;
     }));
@@ -192,39 +203,44 @@ class _FlutterBirdState extends State<FlutterBird> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
 
     Size screenDimensions = MediaQuery.of(context).size;
     double maxWidth = screenDimensions.height * 3 / 4 / 1.3;
     worldDimensions = Size(min(maxWidth, screenDimensions.width), screenDimensions.height * 3 / 4);
+    birdSize = worldDimensions.height / 8;
 
-    return Consumer<Web3Provider>(
-      builder: (context, web3Provider, child) {
+    return Scaffold(
+      body: Consumer<Web3Provider>(
+        builder: (context, web3Provider, child) {
 
 
-
-
-        return GestureDetector(
-          onTapDown: _jump,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                  maxWidth: maxWidth
+          return GestureDetector(
+              onTapDown: playing ? _jump : null,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxWidth: maxWidth
+                  ),
+                  child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const Background(),
+                        // if (!playing)
+                        _buildBirdSelector(),
+                        if (playing)
+                          _buildBird(),
+                        if (playing)
+                          Positioned.fill(child: _buildGameCanvas()),
+                        if (!playing)
+                          _buildMenu(web3Provider),
+                      ]
+                  ),
+                ),
               ),
-              child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    const Background(),
-                    _buildBird(),
-                    if (playing)
-                      Positioned.fill(child: _buildGameCanvas()),
-                    if (!playing)
-                      _buildMenu(web3Provider),
-                  ]
-              ),
-            ),
-          ),
-        );
-      }
+          );
+        }
+      ),
     );
   }
 
@@ -264,73 +280,179 @@ class _FlutterBirdState extends State<FlutterBird> {
     text: "FlutterBird",
   );
 
-  Widget _buildPlayButton() => Container(
-    decoration: ShapeDecoration(
-      shape: PixelBorder.solid(
-        borderRadius: BorderRadius.circular(9.0),
+  Widget _buildPlayButton() => GestureDetector(
+    onTapDown: _jump,
+    child: Container(
+      decoration: ShapeDecoration(
+        shape: PixelBorder.solid(
+          borderRadius: BorderRadius.circular(9.0),
+          color: Colors.white,
+          pixelSize: 3,
+        ),
         color: Colors.white,
-        pixelSize: 3,
+          shadows: const [
+            BoxShadow(
+                offset: Offset(3, 3)
+            )
+          ]
       ),
-      color: Colors.white,
-        shadows: const [
-          BoxShadow(
-              offset: Offset(3, 3)
-          )
-        ]
-    ),
-    height: 60.0,
-    width: 100.0,
-    child: const Center(
-      child: Icon(
-        Icons.play_arrow_rounded,
-        size: 50,
-        color: Colors.green,
+      height: 60.0,
+      width: 100.0,
+      child: const Center(
+        child: Icon(
+          Icons.play_arrow_rounded,
+          size: 50,
+          color: Colors.green,
+        ),
       ),
     ),
+  );
+
+  Widget _buildBirdSelector() => Column(
+    children: [
+      Expanded(
+        flex: 3,
+        child: Column(
+          children: [
+            const Spacer(),
+            SizedBox(
+              height: birdSize,
+              child: PageView(
+                controller: birdSelectorController,
+                onPageChanged: (page) {
+                  HapticFeedback.selectionClick();
+                  setState(() {
+                    selectedBird = page;
+                  });
+                },
+                children: birds.map((bird) => Center(child: Container(color: Colors.white, height: birdSize, width: birdSize, child: bird,))).toList(),
+              ),
+            ),
+            const SizedBox(height: 16,),
+            Text(
+              birds[selectedBird].name,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            const Spacer(),
+          ],
+        ),
+      ),
+      const Spacer()
+    ],
   );
 
   Widget _buildBird() => Column(
     children: [
       Expanded(
         flex: 3,
-        child: Stack(
-          children: [
-            Positioned.fill(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 0),
-                  alignment: Alignment(0, birdY),
-                  child: Transform.rotate(angle: pi / 4 * (-jumpDirection / 4), child: Bird(key: birdKey, size: worldDimensions.height / 18,))
-                ))
-          ],
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 0),
+          alignment: Alignment(0, birdY),
+          child: Transform.rotate(angle: pi / 4 * (-jumpDirection / 4), child: SizedBox(
+            key: birdKey,
+            height: birdSize,
+            width: birdSize,
+            child: birds[selectedBird],
+          ))
         ),
       ),
-      Expanded(
-          flex: 1,
-          child: Container()
-      )
+      const Spacer()
     ],
   );
 
-  _buildWeb3View(Web3Provider web3provider) {
+  _buildWeb3View(Web3Provider web3Provider) {
 
     String statusText = "";
 
-    if (web3provider.isAuthenticated && web3provider.isOnOperatingChain) {
-
+    if (web3Provider.isAuthenticated && web3Provider.isOnOperatingChain) {
+      statusText = "Authenticated (${web3Provider.currentAccountAddress?.substring(0, 6)}...${web3Provider.currentAccountAddress?.substring(38)})";
+    } else if (web3Provider.isAuthenticated && !web3Provider.isOnOperatingChain) {
+      statusText = "Wrong chain. Please use chain ${Web3Provider.operatingChain}";
+    } else {
+      statusText = "Connect Wallet";
     }
 
+    return SafeArea(
+      child: GestureDetector(
+        onTap: _showWeb3PopUp,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              bottom: 20,
+              left: 32,
+              child: Row(
+                children: [
+                  Container(
+                    height: 64,
+                    width: 64,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(2, 2),
+                        )
+                      ]
+                    ),
+                    child: Center(
+                      child: kIsWeb ? Image.network("images/walletconnect.png") : Image.asset("images/walletconnect.png"),
+                    ),
+                  ),
+                  const SizedBox(width: 12,),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        web3Provider.isAuthenticated ? "Wallet Connected" : "No Wallet\nConnected",
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      if (web3Provider.isAuthenticated)
+                        Text(
+                          web3Provider.currentAddressShort ?? "",
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                        )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
     return Column(
       children: [
         TextButton(
           onPressed: () {
-            web3provider.walletConnect();
+            _showWeb3PopUp();
           },
-          child: const Text(
-            "Connect",
+          child: Text(
+            statusText,
+            style: Theme.of(context).textTheme.headline6,
           ),
         )
       ],
     );
+  }
+
+  _showWeb3PopUp() {
+    Navigator.of(context).push(PageRouteBuilder(
+      opaque: false,
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+        return const Web3Popup();
+      },
+      transitionDuration: const Duration(milliseconds: 150),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+
+    ));
   }
 
   Widget _buildGameCanvas() => Column(
@@ -370,4 +492,7 @@ class _FlutterBirdState extends State<FlutterBird> {
       )
     ],
   );
+
+  @override
+  bool get wantKeepAlive => true;
 }
