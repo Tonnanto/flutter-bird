@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'dart:math';
 
+import 'package:flappy_bird/game.dart';
 import 'package:flappy_bird/services/persistence/persistence_service.dart';
 import 'package:flappy_bird/services/web3_provider.dart';
 import 'package:flappy_bird/views/bird.dart';
@@ -13,7 +13,6 @@ import 'package:provider/provider.dart';
 
 import 'views/background.dart';
 import 'views/flappy_text.dart';
-import 'views/pipe.dart';
 import 'views/web3_popup.dart';
 
 void main() {
@@ -52,34 +51,14 @@ class FlutterBird extends StatefulWidget {
 
 class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClientMixin {
 
-  // ticks between two pipes (smaller -> more pipes)
-  static int ticksPerPipe = 50;
-  // ticks until a spawned pipe reaches bird (smaller -> faster)
-  static int speed = 100;
-
   bool playing = false;
-  double birdY = 0;
-  double jumpTime = 0;
-  double initialJumpHeight = 0;
-  double jumpHeight = 0;
-  // inclination of jump used for bird rotation
-  double jumpDirection = 0;
-  int score = 0;
+
+  int? lastScore;
   int? highScore;
-
-  // game loop timer
-  Timer? timer;
-  // tick of the last pipe that spawned
-  int lastPipe = 0;
-
-  List<Pipe> pipes = [];
-  // used to determine when points are gained
-  List<int> upcomingPipeTicks = [];
 
   late Size worldDimensions;
   late double birdSize;
 
-  final GlobalKey birdKey = GlobalKey();
   late final PageController birdSelectorController = PageController(viewportFraction: 0.25);
   late final GlobalKey birdSelectorKey = GlobalKey();
   List<Bird> birds = [
@@ -100,106 +79,25 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
     }));
   }
 
-  /// Start game loop
-  _start() {
-    score = 0;
-    playing = true;
-    timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+  _startGame() {
+    Navigator.of(context).push(PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => FlutterBirdGame(
+          bird: birds[selectedBird],
+          birdSize: birdSize,
+          worldDimensions: worldDimensions,
+          onGameOver: (score) {
+            lastScore = score;
+            if (score > (highScore ?? 0)) {
+              PersistenceService.instance.saveHighScore(score);
+              highScore = score;
+            }
+            setState(() {
 
-      // render bird
-      jumpTime += 0.025;
-      jumpHeight = -4.4 * jumpTime * jumpTime + 2.5 * jumpTime;
-      jumpDirection = -8.8 * jumpTime + 2.5;
-      setState(() {
-        birdY = initialJumpHeight - jumpHeight;
-      });
-
-      // render pipes
-      _updatePipes();
-
-      // update score
-      if (upcomingPipeTicks.first < timer.tick) {
-        upcomingPipeTicks.removeAt(0);
-        setState(() { ++score; });
-      }
-
-      // check for collisions
-      if (_isBirdDead()) {
-        _gameOver();
-      }
-    });
+            });
+          }),
+    ));
   }
 
-  /// Game Over Sequence
-  _gameOver() {
-    timer?.cancel();
-    if (score > (highScore ?? 0)) {
-      PersistenceService.instance.saveHighScore(score);
-      highScore = score;
-    }
-    Timer(const Duration(milliseconds: 1000), () {
-      jumpDirection = 0;
-      setState(() {
-        timer = null;
-        lastPipe = 0;
-        pipes = [];
-        birdY = 0;
-        jumpTime = 0;
-        initialJumpHeight = 0;
-        upcomingPipeTicks = [];
-        playing = false;
-      });
-    });
-
-  }
-
-  _jump(TapDownDetails _) {
-    HapticFeedback.selectionClick();
-    if (!playing) {
-      _start();
-      return;
-    }
-    setState(() {
-      jumpTime = 0;
-      initialJumpHeight = birdY;
-    });
-  }
-
-  _updatePipes() {
-    if (timer == null) return;
-    if (timer!.tick + speed - lastPipe >= ticksPerPipe) {
-      // New Pipe
-      double height = -0.9 + 1.8 * Random().nextDouble();
-      int pipeTick = timer!.tick + speed;
-      pipes.add(Pipe(
-        height: height,
-        passTick: pipeTick,
-        worldDimensions: worldDimensions,
-      ));
-      upcomingPipeTicks.add(pipeTick);
-      lastPipe = pipeTick;
-
-      // Remove pipe that has passed
-      if (pipes.length > 2 * speed / ticksPerPipe && pipes.length > 3) {
-        pipes.removeAt(0);
-      }
-    }
-  }
-
-  /// Checks weather the bird has hit anything
-  _isBirdDead() {
-    // Hits Floor or Ceiling
-    if (birdY > 1.1 || birdY < -1.5) return true;
-
-    // Hits barrier
-    for (Pipe pipe in pipes) {
-      if (pipe.checkCollision(birdKey)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -215,29 +113,20 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
         builder: (context, web3Provider, child) {
 
 
-          return GestureDetector(
-              onTapDown: playing ? _jump : null,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                      maxWidth: maxWidth
-                  ),
-                  child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        const Background(),
-                        // if (!playing)
-                        _buildBirdSelector(),
-                        if (playing)
-                          _buildBird(),
-                        if (playing)
-                          Positioned.fill(child: _buildGameCanvas()),
-                        if (!playing)
-                          _buildMenu(web3Provider),
-                      ]
-                  ),
-                ),
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxWidth: maxWidth
               ),
+              child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const Background(),
+                    _buildBirdSelector(),
+                    _buildMenu(web3Provider),
+                  ]
+              ),
+            ),
           );
         }
       ),
@@ -251,11 +140,11 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
         children: [
           const Spacer(flex: 1,),
           _buildTitle(),
-          if (score != 0)
+          if (lastScore != 0)
             const SizedBox(height: 24,),
-          if (score != 0)
+          if (lastScore != 0)
             FlappyText(
-              text: "$score",
+              text: "$lastScore",
             ),
           const Spacer(flex: 4,),
           _buildPlayButton(),
@@ -281,7 +170,7 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
   );
 
   Widget _buildPlayButton() => GestureDetector(
-    onTapDown: _jump,
+    onTap: _startGame,
     child: Container(
       decoration: ShapeDecoration(
         shape: PixelBorder.solid(
@@ -341,36 +230,9 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
     ],
   );
 
-  Widget _buildBird() => Column(
-    children: [
-      Expanded(
-        flex: 3,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 0),
-          alignment: Alignment(0, birdY),
-          child: Transform.rotate(angle: pi / 4 * (-jumpDirection / 4), child: SizedBox(
-            key: birdKey,
-            height: birdSize,
-            width: birdSize,
-            child: birds[selectedBird],
-          ))
-        ),
-      ),
-      const Spacer()
-    ],
-  );
+
 
   _buildWeb3View(Web3Provider web3Provider) {
-
-    String statusText = "";
-
-    if (web3Provider.isAuthenticated && web3Provider.isOnOperatingChain) {
-      statusText = "Authenticated (${web3Provider.currentAccountAddress?.substring(0, 6)}...${web3Provider.currentAccountAddress?.substring(38)})";
-    } else if (web3Provider.isAuthenticated && !web3Provider.isOnOperatingChain) {
-      statusText = "Wrong chain. Please use chain ${Web3Provider.operatingChain}";
-    } else {
-      statusText = "Connect Wallet";
-    }
 
     return SafeArea(
       child: GestureDetector(
@@ -423,19 +285,6 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
         ),
       ),
     );
-    return Column(
-      children: [
-        TextButton(
-          onPressed: () {
-            _showWeb3PopUp();
-          },
-          child: Text(
-            statusText,
-            style: Theme.of(context).textTheme.headline6,
-          ),
-        )
-      ],
-    );
   }
 
   _showWeb3PopUp() {
@@ -454,44 +303,6 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
 
     ));
   }
-
-  Widget _buildGameCanvas() => Column(
-    children: [
-      Expanded(
-        flex: 3,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Pipes
-            if (timer != null)
-              ...pipes.map((element) {
-                return AnimatedContainer(
-                    duration: const Duration(milliseconds: 0),
-                    alignment: Alignment((element.passTick - timer!.tick) * 3 / speed, 0),
-                    child: element
-                );
-              }).toList(),
-
-            // Score
-            Column(
-              children: [
-                const Spacer(flex: 1,),
-                FlappyText(
-                  text: score.toString(),
-                ),
-                const Spacer(flex: 6,),
-              ],
-            ),
-
-          ]
-        )
-      ),
-      Expanded(
-        flex: 1,
-        child: Container()
-      )
-    ],
-  );
 
   @override
   bool get wantKeepAlive => true;
