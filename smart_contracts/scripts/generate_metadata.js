@@ -38,7 +38,7 @@ function generateMetadata(tokenId) {
     // Check if metadata exists already
     if (fs.existsSync(filename)) {
         console.log('Metadata for skin with tokenId #' + tokenId + ' already exists')
-        return
+        return JSON.parse(fs.readFileSync(filename))
     }
 
     // Generate random metadata
@@ -47,20 +47,24 @@ function generateMetadata(tokenId) {
     // Clone object
     const skinMetadata = Object.assign({}, JSON.parse(JSON.stringify(skinTemplate)));
 
-    // Make at least one trait guaranteed
-    const guaranteedTrait = Math.floor(Math.random() * 4)
-
     const birdList = traits.bird;
     const headList = traits.head;
     const eyesList = traits.eyes;
     const mouthList = traits.mouth;
     const neckList = traits.neck;
 
+    // Prevent default bird from being generated
+    let guaranteedTrait = -1
     const randomBird = getRandomWeightedTrait(birdList)
-    const randomHead = getRandomWeightedTrait(headList, guaranteedTrait === 0)
-    const randomEyes = getRandomWeightedTrait(eyesList, guaranteedTrait === 1)
-    const randomMouth = getRandomWeightedTrait(mouthList, guaranteedTrait === 2)
-    const randomNeck = getRandomWeightedTrait(neckList, guaranteedTrait === 3)
+    if (randomBird === 'default') guaranteedTrait = Math.floor(Math.random() * 4)
+
+    // Have a 2/3 change of at least one trait being empty
+    const guaranteedNotTrait = Math.floor(Math.random() * 6)
+
+    const randomHead = guaranteedNotTrait === 0 ? null : getRandomWeightedTrait(headList, guaranteedTrait === 0)
+    const randomEyes = guaranteedNotTrait === 1 ? "default" : getRandomWeightedTrait(eyesList, guaranteedTrait === 1)
+    const randomMouth = guaranteedNotTrait === 2 ? null : getRandomWeightedTrait(mouthList, guaranteedTrait === 2)
+    const randomNeck = guaranteedNotTrait === 3 ? null : getRandomWeightedTrait(neckList, guaranteedTrait === 3)
 
     skinMetadata['name'] = 'Flutter Bird #' + tokenId.toString()
     skinMetadata['attributes'][0]['value'] = randomBird.toLowerCase()
