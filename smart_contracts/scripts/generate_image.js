@@ -46,11 +46,15 @@ async function generateImage(tokenId, bird, head, eyes, mouth, neck) {
         context.drawImage(headImage, 0, 0, imageSize.width, imageSize.height);
     }
 
+    const imageData = canvas.toBuffer("image/png");
+
     // Save image as png
     fs.writeFileSync(
         `${outputDirectory}/#${tokenId}.png`,
-        canvas.toBuffer("image/png")
+        imageData
     );
+
+    return imageData;
 }
 
 module.exports = { generateImage }

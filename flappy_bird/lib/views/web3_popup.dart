@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import '../services/web3_provider.dart';
+import '../services/web3_service.dart';
 
 class Web3Popup extends StatefulWidget {
   const Web3Popup({
@@ -21,21 +21,21 @@ class _Web3PopupState extends State<Web3Popup> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<Web3Provider>(
-      builder: (context, web3Provider, child) => Scaffold(
+    return Consumer<Web3Service>(
+      builder: (context, web3Service, child) => Scaffold(
         backgroundColor: Colors.transparent,
         body: Stack(
           children: [
             _buildBackground(),
-            _buildBody(web3Provider),
+            _buildBody(web3Service),
           ],
         ),
       ),
     );
   }
 
-  _buildBody(Web3Provider web3Provider) {
-    bool shouldDisplayQR = (web3Provider.webQrData != null && kIsWeb);
+  _buildBody(Web3Service web3Service) {
+    bool shouldDisplayQR = (web3Service.webQrData != null && kIsWeb);
     return Center(
       child: Container(
         constraints: const BoxConstraints(
@@ -50,11 +50,11 @@ class _Web3PopupState extends State<Web3Popup> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: shouldDisplayQR ? [
-              _buildQRView(web3Provider.webQrData!),
+              _buildQRView(web3Service.webQrData!),
               const Spacer(),
               ElevatedButton(
                   onPressed: () {
-                    web3Provider.walletDisconnect();
+                    web3Service.unauthenticate();
                   },
                   child: SizedBox(
                     height: 40,
@@ -67,9 +67,9 @@ class _Web3PopupState extends State<Web3Popup> {
                   )
               )
             ] : [
-              _buildAuthenticationStatusView(web3Provider),
+              _buildAuthenticationStatusView(web3Service),
               const Spacer(),
-              _buildConnectButton(web3Provider),
+              _buildConnectButton(web3Service),
             ],
           ),
         ),
@@ -77,39 +77,39 @@ class _Web3PopupState extends State<Web3Popup> {
     );
   }
 
-  _buildAuthenticationStatusView(Web3Provider web3Provider) {
+  _buildAuthenticationStatusView(Web3Service web3Service) {
     return Column(
       children: [
         Text(
-          "Status: ${web3Provider.isAuthenticated ? "Authenticated" : "Not Authenticated"}",
+          "Status: ${web3Service.isAuthenticated ? "Authenticated" : "Not Authenticated"}",
           style: Theme.of(context).textTheme.headline6,
         ),
-        if (web3Provider.isAuthenticated)
+        if (web3Service.isAuthenticated)
           Text(
-            web3Provider.currentAddressShort ?? "",
+            web3Service.authenticatedAddress ?? "",
             style: Theme.of(context).textTheme.bodyLarge,
           )
       ],
     );
   }
 
-  _buildConnectButton(Web3Provider web3Provider) {
+  _buildConnectButton(Web3Service web3Service) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-          primary: web3Provider.isAuthenticated ? Colors.redAccent : Colors.green,
+          primary: web3Service.isAuthenticated ? Colors.redAccent : Colors.green,
       ),
       onPressed: () {
-        if (web3Provider.isAuthenticated) {
-          web3Provider.walletDisconnect();
+        if (web3Service.isAuthenticated) {
+          web3Service.unauthenticate();
         } else {
-          web3Provider.walletConnect();
+          web3Service.requestAuthentication();
         }
       },
       child: SizedBox(
         height: 40,
         child: Center(
           child: Text(
-            web3Provider.isAuthenticated ? "Disconnect" : "Connect",
+            web3Service.isAuthenticated ? "Disconnect" : "Connect",
             style: Theme.of(context).textTheme.button?.copyWith(color: Colors.white),
           ),
         ),

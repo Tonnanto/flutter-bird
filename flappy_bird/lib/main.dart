@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flappy_bird/game.dart';
 import 'package:flappy_bird/services/persistence/persistence_service.dart';
-import 'package:flappy_bird/services/web3_provider.dart';
+import 'package:flappy_bird/services/web3_service.dart';
 import 'package:flappy_bird/views/bird.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:pixel_border/pixel_border.dart';
 import 'package:provider/provider.dart';
 
+import 'extensions.dart';
+import 'model/skin.dart';
 import 'views/background.dart';
 import 'views/flappy_text.dart';
 import 'views/web3_popup.dart';
@@ -25,10 +27,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<Web3Provider>(
-      create: (BuildContext context) {
-        return Web3Provider()..init();
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<Web3Service>(create: (BuildContext context) => Web3Service()..init())
+      ],
       child: MaterialApp(
         title: 'Flappy Bird',
         theme: ThemeData(
@@ -62,17 +64,17 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
   final PageController birdSelectorController = PageController(viewportFraction: 0.3);
   List<Bird> birds = [
     const Bird(),
-    const Bird(imagePath: "images/img_3.png", name: "Bird #3475",),
-    const Bird(imagePath: "images/img_4.png", name: "Bird #420",),
-    const Bird(imagePath: "images/img_5.png", name: "Bird #6549",),
-    const Bird(imagePath: "images/img_6.png", name: "Bird #4794",),
-    const Bird(imagePath: "images/hipster_bird.png", name: "Bird #34",),
-    const Bird(imagePath: "images/img.png", name: "Bird #867",),
-    const Bird(imagePath: "images/img_1.png", name: "Bird #4598",),
-    const Bird(imagePath: "images/img_2.png", name: "Bird #1245",),
+    const Bird(skin: Skin(imageLocation: "images/img_3.png", name: "Bird #3475",)),
+    // const Bird(imagePath: "images/img_4.png", name: "Bird #420",),
+    // const Bird(imagePath: "images/img_5.png", name: "Bird #6549",),
+    // const Bird(imagePath: "images/img_6.png", name: "Bird #4794",),
+    // const Bird(imagePath: "images/hipster_bird.png", name: "Bird #34",),
+    // const Bird(imagePath: "images/img.png", name: "Bird #867",),
+    // const Bird(imagePath: "images/img_1.png", name: "Bird #4598",),
+    // const Bird(imagePath: "images/img_2.png", name: "Bird #1245",),
   ];
   late int selectedBird = 0;
-  double? scrollPosition;
+  double? scrollPosition = 0;
 
   @override
   void initState() {
@@ -110,9 +112,10 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
     birdSize = worldDimensions.height / 8;
 
     return Scaffold(
-      body: Consumer<Web3Provider>(
-        builder: (context, web3Provider, child) {
+      body: Consumer<Web3Service>(
+        builder: (context, web3Service, child) {
 
+          web3Service.loadSkins();
 
           return Center(
             child: ConstrainedBox(
@@ -123,8 +126,8 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
                   alignment: Alignment.center,
                   children: [
                     const Background(),
-                    _buildBirdSelector(),
-                    _buildMenu(web3Provider),
+                    _buildBirdSelector(web3Service),
+                    _buildMenu(web3Service),
                   ]
               ),
             ),
@@ -134,7 +137,7 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
     );
   }
 
-  Widget _buildMenu(Web3Provider web3Provider) => Column(
+  Widget _buildMenu(Web3Service web3Service) => Column(
     children: [
       Expanded(flex: 3,
         child: Column(
@@ -160,7 +163,7 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
         ],
       )),
       Expanded(flex: 1,
-        child: _buildWeb3View(web3Provider),
+        child: _buildWeb3View(web3Service),
       )
     ],
   );
@@ -198,7 +201,7 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
     ),
   );
 
-  Widget _buildBirdSelector() => Column(
+  Widget _buildBirdSelector(Web3Service web3Service) => Column(
     children: [
       Expanded(
         flex: 3,
@@ -216,19 +219,37 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
                 },
                 child: PageView.builder(
                   controller: birdSelectorController,
+                  scrollBehavior: const AppScrollBehavior(),
                   onPageChanged: (page) {
                     HapticFeedback.selectionClick();
                     setState(() {
                       selectedBird = page;
                     });
                   },
-                  itemCount: birds.length,
+                  itemCount: (web3Service.skins?.length ?? 0) + 1,
                   itemBuilder: (context, index) {
                     double scale = 1;
                     if (scrollPosition != null) {
-                      scale = max(1, (1.5 - (index - scrollPosition!).abs()) + birdSelectorController.viewportFraction);
+                      scale = max(scale, (1.5 - (index - scrollPosition!).abs()) + birdSelectorController.viewportFraction);
                     }
-                    return Center(child: SizedBox(height: birdSize * scale, width: birdSize * scale, child: birds[index],));
+
+                    Bird bird;
+                    if (index == 0) {
+                      bird = const Bird();
+                    } else {
+                      bird = Bird(skin: web3Service.skins![index - 1],);
+                    }
+
+                    return GestureDetector(
+                        onTap: () {
+                          birdSelectorController.animateToPage(index, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+                        },
+                        child: Center(child: SizedBox(
+                          height: birdSize * scale,
+                          width: birdSize * scale,
+                          child: bird,
+                        ))
+                    );
                   },
                 ),
               ),
@@ -248,7 +269,7 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
 
 
 
-  _buildWeb3View(Web3Provider web3Provider) {
+  _buildWeb3View(Web3Service web3Service) {
 
     return SafeArea(
       child: GestureDetector(
@@ -284,12 +305,12 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        web3Provider.isAuthenticated ? "Wallet Connected" : "No Wallet\nConnected",
+                        web3Service.isAuthenticated ? "Wallet Connected" : "No Wallet\nConnected",
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
-                      if (web3Provider.isAuthenticated)
+                      if (web3Service.isAuthenticated)
                         Text(
-                          web3Provider.currentAddressShort ?? "",
+                          web3Service.currentAddressShort ?? "",
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
                         )
                     ],
