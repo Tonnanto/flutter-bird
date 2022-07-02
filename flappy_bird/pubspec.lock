@@ -148,6 +148,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.3"
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.6"
   ffi:
     dependency: transitive
     description:
@@ -208,7 +215,7 @@ packages:
     source: hosted
     version: "2.1.0"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       url: "https://pub.dartlang.org"
@@ -235,6 +242,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
+  ipfs_client_flutter:
+    dependency: "direct main"
+    description:
+      name: ipfs_client_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.7"
   js:
     dependency: transitive
     description:

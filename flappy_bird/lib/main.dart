@@ -4,7 +4,6 @@ import 'package:flappy_bird/game.dart';
 import 'package:flappy_bird/services/persistence/persistence_service.dart';
 import 'package:flappy_bird/services/web3_service.dart';
 import 'package:flappy_bird/views/bird.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +11,6 @@ import 'package:pixel_border/pixel_border.dart';
 import 'package:provider/provider.dart';
 
 import 'extensions.dart';
-import 'model/skin.dart';
 import 'views/background.dart';
 import 'views/flappy_text.dart';
 import 'views/web3_popup.dart';
@@ -64,7 +62,7 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
   final PageController birdSelectorController = PageController(viewportFraction: 0.3);
   List<Bird> birds = [
     const Bird(),
-    const Bird(skin: Skin(imageLocation: "images/img_3.png", name: "Bird #3475",)),
+    // const Bird(skin: Skin(imageLocation: "images/img_3.png", name: "Bird #3475",)),
     // const Bird(imagePath: "images/img_4.png", name: "Bird #420",),
     // const Bird(imagePath: "images/img_5.png", name: "Bird #6549",),
     // const Bird(imagePath: "images/img_6.png", name: "Bird #4794",),
@@ -86,6 +84,23 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
 
   _startGame() {
     HapticFeedback.lightImpact();
+
+    // showModalBottomSheet(context: context, builder: (context) {
+    //   return Consumer<Web3Service>(
+    //     builder: (context, web3Service, child) => FutureBuilder<Skin?>(
+    //       future: web3Service.getSkin(),
+    //       builder: (context, snapshot) {
+    //         if (!snapshot.hasData) return Container();
+    //         return Center(
+    //           child: SizedBox(width: birdSize, height: birdSize, child: Bird(skin: snapshot.data!)),
+    //         );
+    //       },
+    //     ),
+    //   );
+    // });
+    //
+    // return;
+
     Navigator.of(context).push(PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => FlutterBirdGame(
           bird: birds[selectedBird],
@@ -116,6 +131,15 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
         builder: (context, web3Service, child) {
 
           web3Service.loadSkins();
+          if (web3Service.skins != null) {
+            birds = [
+              const Bird(),
+              ...web3Service.skins!.map((e) => Bird(skin: e,))
+            ];
+            if (web3Service.skins!.length < selectedBird) {
+              selectedBird = web3Service.skins!.length - 1;
+            }
+          }
 
           return Center(
             child: ConstrainedBox(

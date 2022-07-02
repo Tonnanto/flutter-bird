@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract FlutterBirdSkins is ERC721Enumerable {
-  using Counters for Counters.Counter;
   using Strings for uint256;
 
-  Counters.Counter private _tokenIds;
+  // Caps the maximum supply
+  uint256 private _maxSupply = 1000;
 
   // Optional mapping for token URIs
   mapping(uint256 => string) private _tokenURIs;
@@ -18,41 +16,47 @@ contract FlutterBirdSkins is ERC721Enumerable {
   address public owner = msg.sender;
 
   // Events
-  event createdCollectible(uint256 indexed tokenId);
+  event SkinMinted(uint256 indexed tokenId);
 
   constructor() ERC721("FlutterBirdSkins", "FBS") {}
 
-  function createCollectible() public returns (uint256) {
-    // 1. Get next token Id
-    uint256 newTokenId = _tokenIds.current();
+  function createCollectible(uint256 newTokenId) public returns (uint256) {
+
+    // 1. verify tokenId
+    require(
+      newTokenId < _maxSupply,
+      "Highest tokenId is #999"
+    );
 
     // 2. safe mint
     _safeMint(msg.sender, newTokenId);
 
     // 3. assign token URI
-    _setTokenURI(newTokenId, "Metadata not yet generated");
+    string memory _tokenURI = string.concat(Strings.toString(newTokenId), ".json");
+    _setTokenURI(newTokenId, _tokenURI);
 
-    // 4. Increase token counter
-    _tokenIds.increment();
-
-    // 5. Emit Event
-    emit createdCollectible(newTokenId);
+    // 4. Emit Event
+    emit SkinMinted(newTokenId);
 
     return newTokenId;
   }
 
   function getNumberOfSkins() public view returns (uint256) {
-    return _tokenIds._value;
+    return super.totalSupply();
   }
 
   function getTokensForOwner(address _owner) public view returns (uint[] memory) {
     uint[] memory _tokensOfOwner = new uint[](ERC721.balanceOf(_owner));
     uint i;
 
-    for (i=0; i < ERC721.balanceOf(_owner); i++){
+    for (i=0; i < ERC721.balanceOf(_owner); i++) {
       _tokensOfOwner[i] = ERC721Enumerable.tokenOfOwnerByIndex(_owner, i);
     }
     return (_tokensOfOwner);
+  }
+
+  function _baseURI() internal view virtual override returns (string memory) {
+    return "ipfs://bafybeiexvqt3uabqzmhquokzyl7gcdxyowz2hf2hdbbifkkyx3waghezqe/";
   }
 
   function setTokenUri(uint256 tokenId, string memory _tokenURI) public {

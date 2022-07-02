@@ -33,11 +33,11 @@ function getRandomWeightedTrait(traitList, guaranteed = false) {
 function generateMetadata(tokenId) {
     console.log('Creating metadata for skin ' + tokenId)
 
-    const filename = '../output/metadata/#' + tokenId.toString() + '.json'
+    const filename = '../output/metadata/' + tokenId.toString() + '.json'
 
     // Check if metadata exists already
     if (fs.existsSync(filename)) {
-        console.log('Metadata for skin with tokenId #' + tokenId + ' already exists')
+        console.log('Metadata for skin with tokenId ' + tokenId + ' already exists')
         return JSON.parse(fs.readFileSync(filename))
     }
 
@@ -59,7 +59,8 @@ function generateMetadata(tokenId) {
     if (randomBird === 'default') guaranteedTrait = Math.floor(Math.random() * 4)
 
     // Have a 2/3 change of at least one trait being empty
-    const guaranteedNotTrait = Math.floor(Math.random() * 6)
+    let guaranteedNotTrait = Math.floor(Math.random() * 6)
+    if (guaranteedTrait === guaranteedNotTrait) guaranteedNotTrait = -1;
 
     const randomHead = guaranteedNotTrait === 0 ? null : getRandomWeightedTrait(headList, guaranteedTrait === 0)
     const randomEyes = guaranteedNotTrait === 1 ? "default" : getRandomWeightedTrait(eyesList, guaranteedTrait === 1)

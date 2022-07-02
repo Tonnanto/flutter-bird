@@ -20,6 +20,7 @@ class Web3Service extends ChangeNotifier {
   bool get isAuthenticated => _authenticationService.isAuthenticated;
   String? get currentAddressShort => "${authenticatedAddress?.substring(0, 8)}...${authenticatedAddress?.substring(36)}";
   String? get webQrData => _authenticationService.webQrData;
+  bool _loadingSkins = false;
 
   // Authorization state
   List<Skin>? skins;
@@ -46,11 +47,16 @@ class Web3Service extends ChangeNotifier {
 
   loadSkins({bool forceReload = false}) async {
     // Reload skins only if address changed
-    if (forceReload || skinOwnerAddress != authenticatedAddress) {
-      skins = await _authorizationService.getSkinsForOwner(authenticatedAddress);
+    if (!_loadingSkins && (forceReload || skinOwnerAddress != authenticatedAddress)) {
+      _loadingSkins = true;
+      await _authorizationService.loadSkinsForOwner(authenticatedAddress, onSkinsUpdated: (skins) {
+        skins?.sort((a, b) => a.tokenId.compareTo(b.tokenId),);
+        this.skins = skins;
+        notifyListeners();
+      });
       skinOwnerAddress = authenticatedAddress;
+      _loadingSkins = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
-
 }

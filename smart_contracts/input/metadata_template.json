@@ -1,7 +1,8 @@
 {
   "name": "",
-  "description": "",
+  "description": "A friendly pixel bird that flies on the ethereum blockchain and is ready to adventure the exciting world of flutter bird.",
   "image": "",
+  "background_color": "40C4FF",
   "attributes": [
     {
       "trait_type": "color",

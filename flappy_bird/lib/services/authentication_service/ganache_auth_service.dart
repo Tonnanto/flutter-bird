@@ -6,7 +6,7 @@ class GanacheAuthenticationService implements AuthenticationService {
   String? webQrData;
 
   @override
-  String? get authenticatedAddress => "0x24EEB7c2b61dAbFC81735365fD3273afe7518e02";
+  String? get authenticatedAddress => "0x05586474C0456580d3927f4e3F77B92Ef9ab76e3";
 
   @override
   bool get isAuthenticated => authenticatedAddress != null && authenticatedAddress!.isNotEmpty;
