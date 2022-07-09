@@ -22,7 +22,12 @@ class AuthorizationService {
   });
 
   Future loadSkinsForOwner(String? ownerAddress, {Function(List<Skin>?)? onSkinsUpdated}) async {
-    if (ownerAddress == null) return;
+    if (ownerAddress == null) {
+      // Reset Skins
+      skins = {};
+      onSkinsUpdated?.call(skins?.values.toList());
+      return;
+    }
 
     final client = Web3Client(rpcUrl, Client());
 

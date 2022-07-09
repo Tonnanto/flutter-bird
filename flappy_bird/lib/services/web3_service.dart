@@ -1,4 +1,5 @@
 
+import 'package:flappy_bird/secrets.dart';
 import 'package:flappy_bird/services/authentication_service/authentication_service.dart';
 import 'package:flappy_bird/services/authentication_service/ganache_auth_service.dart';
 import 'package:flappy_bird/services/authorization_service.dart';
@@ -32,8 +33,8 @@ class Web3Service extends ChangeNotifier {
     /// Setting Up Web3 Connection
     const bool localTestBlockchain = false;
     const int chainId = 5; // Görli Testnet
-    const String skinContractAddress = "0x387f544E4c3B2351d015dF57c30831Ad58D6C798";
-    String rpcUrl = "https://eth-goerli.g.alchemy.com/v2/CT0kmRGFDplSz7RUTk1KMp-ppWcVwKtz"; // TODO: Hide
+    const String skinContractAddress = flutterBirdSkinsContractAddress;
+    String rpcUrl = "https://eth-goerli.g.alchemy.com/v2/$alchemyApiKey"; // TODO: Hide
 
     if (localTestBlockchain)
       rpcUrl = kIsWeb ? 'http://127.0.0.1:7545' : 'http://10.0.2.2:7545'; // Local Ganache Chain

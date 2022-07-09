@@ -85,22 +85,6 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
   _startGame() {
     HapticFeedback.lightImpact();
 
-    // showModalBottomSheet(context: context, builder: (context) {
-    //   return Consumer<Web3Service>(
-    //     builder: (context, web3Service, child) => FutureBuilder<Skin?>(
-    //       future: web3Service.getSkin(),
-    //       builder: (context, snapshot) {
-    //         if (!snapshot.hasData) return Container();
-    //         return Center(
-    //           child: SizedBox(width: birdSize, height: birdSize, child: Bird(skin: snapshot.data!)),
-    //         );
-    //       },
-    //     ),
-    //   );
-    // });
-    //
-    // return;
-
     Navigator.of(context).push(PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => FlutterBirdGame(
           bird: birds[selectedBird],
@@ -137,7 +121,7 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
               ...web3Service.skins!.map((e) => Bird(skin: e,))
             ];
             if (web3Service.skins!.length < selectedBird) {
-              selectedBird = web3Service.skins!.length - 1;
+              selectedBird = web3Service.skins!.length;
             }
           }
 
