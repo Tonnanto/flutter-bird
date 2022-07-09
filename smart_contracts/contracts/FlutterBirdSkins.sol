@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 contract FlutterBirdSkins is ERC721Enumerable {
   using Strings for uint256;
 
-  // Caps the maximum supply
   uint256 private _maxSupply = 1000;
+  uint256 private _mintPrice = 0.01 ether;
 
   // Optional mapping for token URIs
   mapping(uint256 => string) private _tokenURIs;
@@ -15,36 +15,25 @@ contract FlutterBirdSkins is ERC721Enumerable {
   // Assign owner on contract creation
   address public owner = msg.sender;
 
-  // Events
-  event SkinMinted(uint256 indexed tokenId);
-
   constructor() ERC721("FlutterBirdSkins", "FBS") {}
 
-  function createCollectible(uint256 newTokenId) public returns (uint256) {
+  event SkinMinted(uint256 indexed tokenId);
 
-    // 1. verify tokenId
-    require(
-      newTokenId < _maxSupply,
-      "Highest tokenId is #999"
-    );
+  function mintSkin(uint256 newTokenId) public payable {
+    require(newTokenId < _maxSupply, "invalid tokenId. must be #999");
+    require(msg.value >= _mintPrice, "insufficient funds");
 
-    // 2. safe mint
     _safeMint(msg.sender, newTokenId);
 
-    // 3. assign token URI
     string memory _tokenURI = string.concat(Strings.toString(newTokenId), ".json");
     _setTokenURI(newTokenId, _tokenURI);
 
-    // 4. Emit Event
     emit SkinMinted(newTokenId);
-
-    return newTokenId;
   }
 
-  function getNumberOfSkins() public view returns (uint256) {
-    return super.totalSupply();
-  }
-
+  /**
+   * @notice returns a list of tokenIds that are owned by the given address
+   */
   function getTokensForOwner(address _owner) public view returns (uint[] memory) {
     uint[] memory _tokensOfOwner = new uint[](ERC721.balanceOf(_owner));
     uint i;
@@ -55,21 +44,25 @@ contract FlutterBirdSkins is ERC721Enumerable {
     return (_tokensOfOwner);
   }
 
+  /**
+   * @notice returns a list of boolean values indicating whether the skin with that index has been minted already.
+   */
+  function getMintedTokenList() public view returns (bool[] memory) {
+    bool[] memory _unmintedTokes = new bool[](_maxSupply);
+    uint i;
+
+    for (i = 0; i < _maxSupply; i++) {
+      if (_exists(i)) {
+        _unmintedTokes[i] = true;
+      }
+    }
+    return _unmintedTokes;
+  }
+
   function _baseURI() internal view virtual override returns (string memory) {
     return "ipfs://bafybeiexvqt3uabqzmhquokzyl7gcdxyowz2hf2hdbbifkkyx3waghezqe/";
   }
 
-  function setTokenUri(uint256 tokenId, string memory _tokenURI) public {
-    require(
-      _isApprovedOrOwner(_msgSender(), tokenId),
-      "ERC721: transfer caller is not owner nor approved"
-    );
-    _setTokenURI(tokenId, _tokenURI);
-  }
-
-  /**
-   * @dev See {IERC721Metadata-tokenURI}.
-   */
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     require(_exists(tokenId), "ERC721URIStorage: URI query for nonexistent token");
 
@@ -88,33 +81,16 @@ contract FlutterBirdSkins is ERC721Enumerable {
     return tokenURI(tokenId);
   }
 
-  /**
-   * @dev Sets `_tokenURI` as the tokenURI of `tokenId`.
-   *
-   * Requirements:
-   *
-   * - `tokenId` must exist.
-   */
+  function setTokenUri(uint256 tokenId, string memory _tokenURI) public {
+    require(
+      _isApprovedOrOwner(_msgSender(), tokenId),
+      "ERC721: transfer caller is not owner nor approved"
+    );
+    _setTokenURI(tokenId, _tokenURI);
+  }
+
   function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual {
     require(_exists(tokenId), "ERC721URIStorage: URI set of nonexistent token");
     _tokenURIs[tokenId] = _tokenURI;
-  }
-
-  /**
-   * @dev Destroys `tokenId`.
-   * The approval is cleared when the token is burned.
-   *
-   * Requirements:
-   *
-   * - `tokenId` must exist.
-   *
-   * Emits a {Transfer} event.
-   */
-  function _burn(uint256 tokenId) internal virtual override {
-    super._burn(tokenId);
-
-    if (bytes(_tokenURIs[tokenId]).length != 0) {
-      delete _tokenURIs[tokenId];
-    }
   }
 }
