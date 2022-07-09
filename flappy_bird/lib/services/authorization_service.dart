@@ -1,8 +1,6 @@
 import 'dart:convert';
 
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:web3dart/web3dart.dart';
@@ -10,20 +8,21 @@ import 'package:web3dart/web3dart.dart';
 import '../flutterbirds.g.dart';
 import '../model/skin.dart';
 
-const String contractAddress = '0x7889c0EB443A22Cc3469869c561e0280e70579F7';
-const String rpcUrl = kIsWeb ? 'http://127.0.0.1:7545' : 'http://10.0.2.2:7545'; // Local Ganache Chain
-
 /// Authorizes authenticated users to use skins and perks by
 /// communicating with smart contracts in order to get the owned NFTs
 class AuthorizationService {
 
   Map<int, Skin>? skins;
+  final String contractAddress;
+  final String rpcUrl;
+
+  AuthorizationService({
+    required this.contractAddress,
+    required this.rpcUrl,
+  });
 
   Future loadSkinsForOwner(String? ownerAddress, {Function(List<Skin>?)? onSkinsUpdated}) async {
-
-    if (ownerAddress == null) {
-      return [];
-    }
+    if (ownerAddress == null) return;
 
     final client = Web3Client(rpcUrl, Client());
 
@@ -62,6 +61,8 @@ class AuthorizationService {
     await Future.value(futures);
   }
 
+  /// Uses the token URI to fetch the image file from IPFS
+  /// @return the Skin Object with the correct image data
   Future<Skin?> getSkin(String tokenUri, int tokenId) async {
     // Uri metadataUrl = Uri.parse('http://ipfs.io/ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/124');
     // Uri metadataUrl = Uri.parse('https://nftstorage.link/ipfs/bafybeifx2zl5qv37gzwyc74f6ogjdeviz3azdgeinvqisnh23a2i35s7pm/405.json');

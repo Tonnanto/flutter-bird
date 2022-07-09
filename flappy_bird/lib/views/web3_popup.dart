@@ -78,15 +78,30 @@ class _Web3PopupState extends State<Web3Popup> {
   }
 
   _buildAuthenticationStatusView(Web3Service web3Service) {
+    String statusText = "Not Authenticated";
+    if (web3Service.isAuthenticated) {
+      statusText = web3Service.isOnOperatingChain ? "Authenticated" : "\nAuthenticated on wrong chain";
+    }
     return Column(
       children: [
         Text(
-          "Status: ${web3Service.isAuthenticated ? "Authenticated" : "Not Authenticated"}",
+          "Status: $statusText",
           style: Theme.of(context).textTheme.headline6,
         ),
+
+        if (!web3Service.isOnOperatingChain)
+          const SizedBox(height: 16,),
+        if (!web3Service.isOnOperatingChain)
+          Text(
+            "Please connect with a wallet on ${web3Service.operatingChainName}",
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+
+        if (web3Service.isAuthenticated)
+          const SizedBox(height: 16,),
         if (web3Service.isAuthenticated)
           Text(
-            web3Service.authenticatedAddress ?? "",
+            "Wallet address:\n" + (web3Service.authenticatedAddress ?? ""),
             style: Theme.of(context).textTheme.bodyLarge,
           )
       ],

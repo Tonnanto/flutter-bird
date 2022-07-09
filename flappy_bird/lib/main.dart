@@ -295,6 +295,11 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
 
   _buildWeb3View(Web3Service web3Service) {
 
+    String statusText = "No Wallet\nConnected";
+    if (web3Service.isAuthenticated) {
+      statusText = web3Service.isOnOperatingChain ? "Wallet Connected" : "Wallet on wrong chain";
+    }
+
     return SafeArea(
       child: GestureDetector(
         onTap: _showWeb3PopUp,
@@ -329,7 +334,7 @@ class _FlutterBirdState extends State<FlutterBird> with AutomaticKeepAliveClient
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        web3Service.isAuthenticated ? "Wallet Connected" : "No Wallet\nConnected",
+                        statusText,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                       if (web3Service.isAuthenticated)

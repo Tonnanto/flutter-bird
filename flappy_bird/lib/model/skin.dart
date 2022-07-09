@@ -1,10 +1,12 @@
 
 class Skin {
-  final String imageLocation;
+  final int tokenId;
+  final String? imageLocation;
   final String name;
 
   const Skin({
-    required this.imageLocation,
+    this.imageLocation,
+    required this.tokenId,
     required this.name,
   });
 }

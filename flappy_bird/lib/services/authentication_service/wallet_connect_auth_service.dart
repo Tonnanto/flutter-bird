@@ -7,9 +7,11 @@ import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'authentication_service.dart';
 
 class WalletConnectAuthenticationService implements AuthenticationService {
-  static const int operatingChain = 4; // Rinkeby?
-
+  final int operatingChain;
   WalletConnect? _connector;
+
+  @override
+  String get operatingChainName => operatingChain == 5 ? "Görli Testnet" : "Chain $operatingChain";
 
   @override
   String? get authenticatedAddress {
@@ -18,7 +20,7 @@ class WalletConnectAuthenticationService implements AuthenticationService {
   }
 
   @override
-  bool get isOnOperatingChain => currentChain == WalletConnectAuthenticationService.operatingChain;
+  bool get isOnOperatingChain => currentChain == operatingChain;
   int? get currentChain => _connector?.session.chainId;
 
   @override
@@ -30,6 +32,10 @@ class WalletConnectAuthenticationService implements AuthenticationService {
   @override
   String? webQrData;
 
+  WalletConnectAuthenticationService({
+    required this.operatingChain,
+  });
+
   /// Prompts user to authenticate with a wallet
   @override
   requestAuthentication({Function()? onAuthStatusChanged}) async {
@@ -40,7 +46,7 @@ class WalletConnectAuthenticationService implements AuthenticationService {
     // Create a new session
     if (!isConnected) {
       await _connector?.createSession(
-          chainId: 1,
+          chainId: operatingChain,
           onDisplayUri: (uri) async {
             // Launches Wallet App (Metamask)
             if (kIsWeb) {
@@ -79,7 +85,7 @@ class WalletConnectAuthenticationService implements AuthenticationService {
     );
 
     // Subscribe to events
-    _connector?.on('connect', (session) {
+    _connector?.on('connect', (session) async {
       print('connected: ' + session.toString());
       webQrData = null;
       onConnectionStatusChanged?.call();
@@ -95,4 +101,5 @@ class WalletConnectAuthenticationService implements AuthenticationService {
       onConnectionStatusChanged?.call();
     });
   }
+
 }

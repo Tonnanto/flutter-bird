@@ -4,6 +4,7 @@ abstract class AuthenticationService {
   String? get authenticatedAddress;
   bool get isAuthenticated;
   bool get isOnOperatingChain;
+  String get operatingChainName;
 
   String? webQrData;
 

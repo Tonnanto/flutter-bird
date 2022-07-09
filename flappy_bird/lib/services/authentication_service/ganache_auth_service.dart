@@ -6,7 +6,10 @@ class GanacheAuthenticationService implements AuthenticationService {
   String? webQrData;
 
   @override
-  String? get authenticatedAddress => "0x05586474C0456580d3927f4e3F77B92Ef9ab76e3";
+  String get operatingChainName => "Local Ganache Blockchain";
+
+  @override
+  String? get authenticatedAddress => "0x7a42E0b8BE05AC3e9F01ef604bbDCDA9F4129DF1";
 
   @override
   bool get isAuthenticated => authenticatedAddress != null && authenticatedAddress!.isNotEmpty;
@@ -25,5 +28,4 @@ class GanacheAuthenticationService implements AuthenticationService {
     // TODO: implement unauthenticate
     throw UnimplementedError();
   }
-
 }
