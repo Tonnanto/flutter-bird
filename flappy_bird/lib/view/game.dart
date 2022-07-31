@@ -2,13 +2,13 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flappy_bird/views/pipe.dart';
+import 'package:flappy_bird/view/widgets/pipe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'views/background.dart';
-import 'views/bird.dart';
-import 'views/flappy_text.dart';
+import 'widgets/background.dart';
+import 'widgets/bird.dart';
+import 'widgets/flappy_text.dart';
 
 class FlutterBirdGame extends StatefulWidget {
   const FlutterBirdGame({
@@ -30,7 +30,7 @@ class FlutterBirdGame extends StatefulWidget {
 
 class _FlutterBirdGameState extends State<FlutterBirdGame> {
 
-  /// ++++++++++++++++++++++++ GAME STATE ++++++++++++++++++++++++++++
+  /// ++++++++++++++++++++++++ GAME STATE (MODEL) ++++++++++++++++++++++++++++
 
   final GlobalKey birdKey = GlobalKey();
 
@@ -58,7 +58,7 @@ class _FlutterBirdGameState extends State<FlutterBirdGame> {
   List<int> upcomingPipeTicks = [];
 
 
-  /// ++++++++++++++++++++++++ GAME LOGIC ++++++++++++++++++++++++++++
+  /// ++++++++++++++++++++++++ GAME LOGIC (CONTROLLER) ++++++++++++++++++++++++++++
 
   /// Start game loop
   @override
@@ -161,7 +161,7 @@ class _FlutterBirdGameState extends State<FlutterBirdGame> {
     return false;
   }
 
-  /// ++++++++++++++++++++++++ GAME UI ++++++++++++++++++++++++++++
+  /// ++++++++++++++++++++++++ GAME UI (VIEW) ++++++++++++++++++++++++++++
 
   @override
   Widget build(BuildContext context) {

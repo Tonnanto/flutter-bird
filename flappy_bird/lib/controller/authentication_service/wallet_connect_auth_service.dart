@@ -1,22 +1,36 @@
 
 
-import 'package:flutter/foundation.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-import 'package:walletconnect_dart/walletconnect_dart.dart';
+import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:walletconnect_dart/walletconnect_dart.dart';
+import 'package:http/http.dart' as http;
+
+
+import '../../model/account.dart';
+import '../../model/wallet_provider.dart';
 import 'authentication_service.dart';
 
 class WalletConnectAuthenticationService implements AuthenticationService {
+
+  @override
+  late final List<WalletProvider> availableWallets;
+
   final int operatingChain;
   WalletConnect? _connector;
 
   @override
-  String get operatingChainName => operatingChain == 5 ? "Görli Testnet" : "Chain $operatingChain";
+  String get operatingChainName => operatingChain == 5 ? "Goerli Testnet" : "Chain $operatingChain";
 
   @override
-  String? get authenticatedAddress {
+  Account? get authenticatedAccount {
     if (_connector?.session.accounts.isEmpty ?? true) return null;
-    return _connector?.session.accounts.first;
+    return Account(
+      address: _connector!.session.accounts.first,
+      chainId: _connector!.session.chainId,
+    );
   }
 
   @override
@@ -24,7 +38,7 @@ class WalletConnectAuthenticationService implements AuthenticationService {
   int? get currentChain => _connector?.session.chainId;
 
   @override
-  bool get isAuthenticated => isConnected && authenticatedAddress != null;
+  bool get isAuthenticated => isConnected && authenticatedAccount != null;
   bool get isConnected => _connector?.connected ?? false;
 
 
@@ -34,11 +48,25 @@ class WalletConnectAuthenticationService implements AuthenticationService {
 
   WalletConnectAuthenticationService({
     required this.operatingChain,
-  });
+  }) {
+    if (kIsWeb) {
+      requestAuthentication(null);
+    } else {
+      _loadWallets();
+    }
+  }
+
+  /// Loads all WalletConnect compatible wallets
+  _loadWallets() async {
+    final walletResponse = await http.get(Uri.parse('https://registry.walletconnect.org/data/wallets.json'));
+    final walletData = json.decode(walletResponse.body);
+    availableWallets = walletData.entries.map<WalletProvider>((data) => WalletProvider.fromJson(data.value)).toList();
+
+  }
 
   /// Prompts user to authenticate with a wallet
   @override
-  requestAuthentication({Function()? onAuthStatusChanged}) async {
+  requestAuthentication(WalletProvider? wallet, {Function()? onAuthStatusChanged}) async {
 
     // Create fresh connector
     _createConnector(onConnectionStatusChanged: onAuthStatusChanged);
@@ -53,7 +81,7 @@ class WalletConnectAuthenticationService implements AuthenticationService {
               webQrData = uri;
               onAuthStatusChanged?.call();
             } else {
-              await launchUrlString(uri);
+              _launchWallet(wallet: wallet, uri: uri);
             }
           }
       );
@@ -102,4 +130,39 @@ class WalletConnectAuthenticationService implements AuthenticationService {
     });
   }
 
+  Future<void> _launchWallet({
+    WalletProvider? wallet,
+    required String uri,
+  }) async {
+
+    if (wallet == null) {
+      launchUrl(Uri.parse(uri));
+      return;
+    }
+
+    if (wallet.universal != null &&
+        await canLaunchUrl(Uri.parse(wallet.universal!))) {
+      await launchUrl(
+        _convertToWcUri(appLink: wallet.universal!, wcUri: uri),
+        mode: LaunchMode.externalApplication,
+      );
+    } else if (wallet.native != null &&
+        await canLaunchUrl(Uri.parse(wallet.native!))) {
+      await launchUrl(
+        _convertToWcUri(appLink: wallet.native!, wcUri: uri),
+      );
+    } else {
+
+      if (Platform.isIOS && wallet.iosLink != null) {
+        await launchUrl(Uri.parse(wallet.iosLink!));
+      } else if (Platform.isAndroid && wallet.androidLink != null) {
+        await launchUrl(Uri.parse(wallet.androidLink!));
+      }
+    }
+  }
+
+  Uri _convertToWcUri({
+    required String appLink,
+    required String wcUri,
+  }) => Uri.parse('$appLink/wc?uri=${Uri.encodeComponent(wcUri)}');
 }

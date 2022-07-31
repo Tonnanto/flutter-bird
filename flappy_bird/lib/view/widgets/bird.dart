@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../model/skin.dart';
+import '../../model/skin.dart';
 
 class Bird extends StatelessWidget {
 
