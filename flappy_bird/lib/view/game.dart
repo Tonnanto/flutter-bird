@@ -38,9 +38,9 @@ class _FlutterBirdGameState extends State<FlutterBirdGame> {
   Timer? timer;
 
   // ticks between two pipes (smaller -> more pipes)
-  static int ticksPerPipe = 50;
+  static int ticksPerPipe = 100;
   // ticks until a spawned pipe reaches bird (smaller -> faster)
-  static int speed = 100;
+  static int speed = 220;
 
   double birdY = 0;
   double jumpTime = 0;
@@ -65,11 +65,11 @@ class _FlutterBirdGameState extends State<FlutterBirdGame> {
   void initState() {
     super.initState();
     score = 0;
-    timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 15), (timer) {
 
       // render bird
-      jumpTime += 0.025;
-      jumpHeight = -4.4 * jumpTime * jumpTime + 2.5 * jumpTime;
+      jumpTime += 0.0125;
+      jumpHeight = -4.3 * jumpTime * jumpTime + 2.3 * jumpTime;
       jumpDirection = -8.8 * jumpTime + 2.5;
       setState(() {
         birdY = initialJumpHeight - jumpHeight;
@@ -194,7 +194,7 @@ class _FlutterBirdGameState extends State<FlutterBirdGame> {
         child: AnimatedContainer(
             duration: const Duration(milliseconds: 0),
             alignment: Alignment(0, birdY),
-            child: Transform.rotate(angle: pi / 4 * (-jumpDirection / 4), child: SizedBox(
+            child: Transform.rotate(angle: pi / 4 * (-jumpDirection / 6), child: SizedBox(
               key: birdKey,
               height: widget.birdSize,
               width: widget.birdSize,

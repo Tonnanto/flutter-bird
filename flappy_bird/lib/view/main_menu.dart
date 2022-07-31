@@ -38,14 +38,6 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
   final PageController birdSelectorController = PageController(viewportFraction: 0.3);
   List<Bird> birds = [
     const Bird(),
-    // const Bird(skin: Skin(imageLocation: "images/img_3.png", name: "Bird #3475",)),
-    // const Bird(imagePath: "images/img_4.png", name: "Bird #420",),
-    // const Bird(imagePath: "images/img_5.png", name: "Bird #6549",),
-    // const Bird(imagePath: "images/img_6.png", name: "Bird #4794",),
-    // const Bird(imagePath: "images/hipster_bird.png", name: "Bird #34",),
-    // const Bird(imagePath: "images/img.png", name: "Bird #867",),
-    // const Bird(imagePath: "images/img_1.png", name: "Bird #4598",),
-    // const Bird(imagePath: "images/img_2.png", name: "Bird #1245",),
   ];
   late int selectedBird = 0;
   double? scrollPosition = 0;
@@ -99,6 +91,8 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
               if (web3Service.skins!.length < selectedBird) {
                 selectedBird = web3Service.skins!.length;
               }
+            } else {
+              selectedBird = 0;
             }
 
             return Center(

@@ -14,7 +14,7 @@ class Pipe extends StatelessWidget {
   // Value between 0 and 2
   static double width = 0.25;
   // Value between 0 and 2
-  final double space = 0.7;
+  final double space = 0.6;
   // Value between -1.0 and 1.0
   final double height;
 
@@ -47,8 +47,12 @@ class Pipe extends StatelessWidget {
             Container(
               key: topPipeKey,
               decoration: const BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5))
+                image: DecorationImage(
+                  image: AssetImage("images/pipe_top.png"),
+                  alignment: Alignment.bottomCenter,
+                  fit: BoxFit.cover
+                ),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(2), bottomRight: Radius.circular(2))
               ),
               height: topHeight,
             ),
@@ -56,8 +60,12 @@ class Pipe extends StatelessWidget {
             Container(
               key: bottomPipeKey,
               decoration: const BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5))
+                  image: DecorationImage(
+                      image: AssetImage("images/pipe_bottom.png"),
+                      alignment: Alignment.topCenter,
+                      fit: BoxFit.cover
+                  ),
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))
               ),
               height: bottomHeight,
             )

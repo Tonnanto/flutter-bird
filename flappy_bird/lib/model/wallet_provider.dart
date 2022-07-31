@@ -2,7 +2,6 @@
 class WalletProvider {
   final String id;
   final String name;
-  final String? description;
   final String? imageUrl;
   final String? iosLink;
   final String? androidLink;
@@ -12,7 +11,6 @@ class WalletProvider {
   WalletProvider({
     required this.id,
     required this.name,
-    required this.description,
     required this.imageUrl,
     required this.iosLink,
     required this.androidLink,
@@ -27,7 +25,6 @@ class WalletProvider {
     return WalletProvider(
       id: json['id'] as String,
       name: json['name'] as String,
-      description: json['description'] as String?,
       imageUrl: imageMap['md'] as String?,
       iosLink: appMap['ios'] as String?,
       androidLink: appMap['android'] as String?,

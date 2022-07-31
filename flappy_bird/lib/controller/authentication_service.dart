@@ -11,20 +11,16 @@ import 'package:http/http.dart' as http;
 
 import '../../model/account.dart';
 import '../../model/wallet_provider.dart';
-import 'authentication_service.dart';
 
-class WalletConnectAuthenticationService implements AuthenticationService {
+class AuthenticationService {
 
-  @override
   late final List<WalletProvider> availableWallets;
 
   final int operatingChain;
   WalletConnect? _connector;
 
-  @override
   String get operatingChainName => operatingChain == 5 ? "Goerli Testnet" : "Chain $operatingChain";
 
-  @override
   Account? get authenticatedAccount {
     if (_connector?.session.accounts.isEmpty ?? true) return null;
     return Account(
@@ -33,20 +29,17 @@ class WalletConnectAuthenticationService implements AuthenticationService {
     );
   }
 
-  @override
   bool get isOnOperatingChain => currentChain == operatingChain;
   int? get currentChain => _connector?.session.chainId;
 
-  @override
   bool get isAuthenticated => isConnected && authenticatedAccount != null;
   bool get isConnected => _connector?.connected ?? false;
 
 
   // The data to display in a QR Code for connections on Desktop / Browser.
-  @override
   String? webQrData;
 
-  WalletConnectAuthenticationService({
+  AuthenticationService({
     required this.operatingChain,
   }) {
     if (kIsWeb) {
@@ -65,7 +58,6 @@ class WalletConnectAuthenticationService implements AuthenticationService {
   }
 
   /// Prompts user to authenticate with a wallet
-  @override
   requestAuthentication(WalletProvider? wallet, {Function()? onAuthStatusChanged}) async {
 
     // Create fresh connector
@@ -90,7 +82,6 @@ class WalletConnectAuthenticationService implements AuthenticationService {
     }
   }
 
-  @override
   unauthenticate() async {
     await _connector?.killSession();
     _connector = null;

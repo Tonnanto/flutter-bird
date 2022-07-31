@@ -1,13 +1,12 @@
 
 import 'package:flappy_bird/secrets.dart';
-import 'package:flappy_bird/controller/authentication_service/authentication_service.dart';
+import 'package:flappy_bird/controller/authentication_service.dart';
 import 'package:flappy_bird/controller/authorization_service.dart';
 import 'package:flutter/foundation.dart';
 
 import '../model/account.dart';
 import '../model/skin.dart';
 import '../model/wallet_provider.dart';
-import 'authentication_service/wallet_connect_auth_service.dart';
 import 'authorization_service.dart';
 
 
@@ -37,7 +36,7 @@ class FlutterBirdController extends ChangeNotifier {
     const String skinContractAddress = flutterBirdSkinsContractAddress;
     String rpcUrl = "https://eth-goerli.g.alchemy.com/v2/$alchemyApiKey";
 
-    _authenticationService = WalletConnectAuthenticationService(operatingChain: chainId);
+    _authenticationService = AuthenticationService(operatingChain: chainId);
     _authorizationService = AuthorizationService(contractAddress: skinContractAddress, rpcUrl: rpcUrl);
   }
 

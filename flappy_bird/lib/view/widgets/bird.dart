@@ -12,7 +12,7 @@ class Bird extends StatelessWidget {
 
   final Skin? skin;
   bool get isLoading => skin != null && skin!.imageLocation == null;
-  String get name => skin?.name ?? "Default";
+  String get name => skin?.tokenId != null ? ("#${skin!.tokenId}") : "";
 
   @override
   Widget build(BuildContext context) {
