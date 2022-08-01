@@ -12,15 +12,30 @@ import 'package:http/http.dart' as http;
 import '../../model/account.dart';
 import '../../model/wallet_provider.dart';
 
-class AuthenticationService {
+abstract class AuthenticationService {
+  List<WalletProvider> get availableWallets;
+  Account? get authenticatedAccount;
+  String get operatingChainName;
+  bool get isOnOperatingChain;
+  bool get isAuthenticated;
+  String? get webQrData;
 
+  requestAuthentication({WalletProvider? walletProvider, Function()? onAuthStatusChanged});
+  unauthenticate();
+}
+
+class AuthenticationServiceImpl implements AuthenticationService {
+
+  @override
   late final List<WalletProvider> availableWallets;
 
   final int operatingChain;
   WalletConnect? _connector;
 
+  @override
   String get operatingChainName => operatingChain == 5 ? "Goerli Testnet" : "Chain $operatingChain";
 
+  @override
   Account? get authenticatedAccount {
     if (_connector?.session.accounts.isEmpty ?? true) return null;
     return Account(
@@ -29,21 +44,24 @@ class AuthenticationService {
     );
   }
 
+  @override
   bool get isOnOperatingChain => currentChain == operatingChain;
   int? get currentChain => _connector?.session.chainId;
 
+  @override
   bool get isAuthenticated => isConnected && authenticatedAccount != null;
   bool get isConnected => _connector?.connected ?? false;
 
 
   // The data to display in a QR Code for connections on Desktop / Browser.
+  @override
   String? webQrData;
 
-  AuthenticationService({
+  AuthenticationServiceImpl({
     required this.operatingChain,
   }) {
     if (kIsWeb) {
-      requestAuthentication(null);
+      requestAuthentication();
     } else {
       _loadWallets();
     }
@@ -54,11 +72,11 @@ class AuthenticationService {
     final walletResponse = await http.get(Uri.parse('https://registry.walletconnect.org/data/wallets.json'));
     final walletData = json.decode(walletResponse.body);
     availableWallets = walletData.entries.map<WalletProvider>((data) => WalletProvider.fromJson(data.value)).toList();
-
   }
 
   /// Prompts user to authenticate with a wallet
-  requestAuthentication(WalletProvider? wallet, {Function()? onAuthStatusChanged}) async {
+  @override
+  requestAuthentication({WalletProvider? walletProvider, Function()? onAuthStatusChanged}) async {
 
     // Create fresh connector
     _createConnector(onConnectionStatusChanged: onAuthStatusChanged);
@@ -73,7 +91,7 @@ class AuthenticationService {
               webQrData = uri;
               onAuthStatusChanged?.call();
             } else {
-              _launchWallet(wallet: wallet, uri: uri);
+              _launchWallet(wallet: walletProvider, uri: uri);
             }
           }
       );

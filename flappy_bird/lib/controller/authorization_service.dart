@@ -9,17 +9,24 @@ import '../model/skin.dart';
 
 /// Authorizes authenticated users to use skins and perks by
 /// communicating with smart contracts in order to get the owned NFTs
-class AuthorizationService {
+abstract class AuthorizationService {
+  Map<int, Skin>? get skins;
+  Future loadSkinsForOwner(String? ownerAddress, {Function(List<Skin>?)? onSkinsUpdated});
+}
 
+class AuthorizationServiceImpl implements AuthorizationService {
+
+  @override
   Map<int, Skin>? skins;
   final String contractAddress;
   final String rpcUrl;
 
-  AuthorizationService({
+  AuthorizationServiceImpl({
     required this.contractAddress,
     required this.rpcUrl,
   });
 
+  @override
   Future loadSkinsForOwner(String? ownerAddress, {Function(List<Skin>?)? onSkinsUpdated}) async {
     if (ownerAddress == null) {
       // Reset Skins

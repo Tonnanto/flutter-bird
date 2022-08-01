@@ -178,7 +178,7 @@ class _WalletPopupState extends State<WalletPopup> {
             ),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
-              flutterBirdController.requestAuthentication(wallet: wallet);
+              flutterBirdController.requestAuthentication(walletProvider: wallet);
             }
           );
         },
