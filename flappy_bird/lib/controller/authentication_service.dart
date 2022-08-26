@@ -1,13 +1,15 @@
 
 
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
-import 'package:http/http.dart' as http;
-
 
 import '../../model/account.dart';
 import '../../model/wallet_provider.dart';
@@ -36,13 +38,8 @@ class AuthenticationServiceImpl implements AuthenticationService {
   String get operatingChainName => operatingChain == 5 ? "Goerli Testnet" : "Chain $operatingChain";
 
   @override
-  Account? get authenticatedAccount {
-    if (_connector?.session.accounts.isEmpty ?? true) return null;
-    return Account(
-      address: _connector!.session.accounts.first,
-      chainId: _connector!.session.chainId,
-    );
-  }
+  Account? get authenticatedAccount => _authenticatedAccount;
+  Account? _authenticatedAccount;
 
   @override
   bool get isOnOperatingChain => currentChain == operatingChain;
@@ -100,8 +97,46 @@ class AuthenticationServiceImpl implements AuthenticationService {
     }
   }
 
+  /// Send request to the users wallet to sign a message
+  /// User will be authenticated if the signature could be verified
+  Future<bool> _verifySignature() async {
+    String? address = _connector?.session.accounts.first;
+    int? chainId = _connector?.session.chainId;
+    if (address == null || chainId == null) return false;
+
+    String messageText = "Please sign this message to authenticate with FlutterBird.";
+
+    // Let Crypto-Wallet sign custom message
+    final String signature = await _connector?.sendCustomRequest(
+        method: "personal_sign",
+        params: [
+          address,
+          messageText
+        ]
+    );
+
+    // Check if signature is valid by recovering the exact address from message and signature
+    String recoveredAddress = EthSigUtil.recoverPersonalSignature(
+        signature: signature,
+        message: Uint8List.fromList(utf8.encode(messageText))
+    );
+
+    // if initial address and recovered address are identical the message has been signed ith the correct private key
+    bool isAuthenticated =  recoveredAddress == address;
+
+    // Set authenticated account
+    _authenticatedAccount = isAuthenticated ? Account(
+      address: recoveredAddress,
+      chainId: chainId
+    ) : null;
+
+    return isAuthenticated;
+  }
+
+  @override
   unauthenticate() async {
     await _connector?.killSession();
+    _authenticatedAccount = null;
     _connector = null;
     webQrData = null;
   }
@@ -123,18 +158,22 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
     // Subscribe to events
     _connector?.on('connect', (session) async {
-      print('connected: ' + session.toString());
+      log('connected: ' + session.toString(), name: 'AuthenticationService');
       webQrData = null;
+      final authenticated = await _verifySignature();
+      if (authenticated) log('authenticated successfully: ' + session.toString(), name: 'AuthenticationService');
       onConnectionStatusChanged?.call();
     });
-    _connector?.on('session_update', (payload) {
-      print('session_update: ' + payload.toString());
+    _connector?.on('session_update', (payload) async {
+      log('session_update: ' + payload.toString(), name: 'AuthenticationService');
       webQrData = null;
+      await _verifySignature();
       onConnectionStatusChanged?.call();
     });
     _connector?.on('disconnect', (session) {
-      print('disconnect: ' + session.toString());
+      log('disconnect: ' + session.toString(), name: 'AuthenticationService');
       webQrData = null;
+      _authenticatedAccount = null;
       onConnectionStatusChanged?.call();
     });
   }
