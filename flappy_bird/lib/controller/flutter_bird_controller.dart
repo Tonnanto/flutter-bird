@@ -1,27 +1,28 @@
 
 import 'package:flappy_bird/secrets.dart';
-import 'package:flappy_bird/services/authentication_service/authentication_service.dart';
-import 'package:flappy_bird/services/authentication_service/ganache_auth_service.dart';
-import 'package:flappy_bird/services/authorization_service.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flappy_bird/controller/authentication_service.dart';
+import 'package:flappy_bird/controller/authorization_service.dart';
 import 'package:flutter/foundation.dart';
 
+import '../model/account.dart';
 import '../model/skin.dart';
-import 'authentication_service/wallet_connect_auth_service.dart';
+import '../model/wallet_provider.dart';
+import 'authorization_service.dart';
 
 
 
-class Web3Service extends ChangeNotifier {
+class FlutterBirdController extends ChangeNotifier {
 
   late final AuthenticationService _authenticationService;
   late final AuthorizationService _authorizationService;
 
   // Authentication state
-  String? get authenticatedAddress => _authenticationService.authenticatedAddress;
+  List<WalletProvider> get availableWallets => _authenticationService.availableWallets;
+  Account? get authenticatedAccount => _authenticationService.authenticatedAccount;
   bool get isOnOperatingChain => _authenticationService.isOnOperatingChain;
   String get operatingChainName => _authenticationService.operatingChainName;
   bool get isAuthenticated => _authenticationService.isAuthenticated;
-  String? get currentAddressShort => "${authenticatedAddress?.substring(0, 8)}...${authenticatedAddress?.substring(36)}";
+  String? get currentAddressShort => "${authenticatedAccount?.address.substring(0, 8)}...${authenticatedAccount?.address.substring(36)}";
   String? get webQrData => _authenticationService.webQrData;
   bool _loadingSkins = false;
 
@@ -31,20 +32,17 @@ class Web3Service extends ChangeNotifier {
 
   init() {
     /// Setting Up Web3 Connection
-    const bool localTestBlockchain = false;
     const int chainId = 5; // Görli Testnet
     const String skinContractAddress = flutterBirdSkinsContractAddress;
-    String rpcUrl = "https://eth-goerli.g.alchemy.com/v2/$alchemyApiKey"; // TODO: Hide
+    String rpcUrl = "https://eth-goerli.g.alchemy.com/v2/$alchemyApiKey";
 
-    if (localTestBlockchain)
-      rpcUrl = kIsWeb ? 'http://127.0.0.1:7545' : 'http://10.0.2.2:7545'; // Local Ganache Chain
-
-    _authenticationService = localTestBlockchain ? GanacheAuthenticationService() : WalletConnectAuthenticationService(operatingChain: chainId);
-    _authorizationService = AuthorizationService(contractAddress: skinContractAddress, rpcUrl: rpcUrl);
+    _authenticationService = AuthenticationServiceImpl(operatingChain: chainId);
+    _authorizationService = AuthorizationServiceImpl(contractAddress: skinContractAddress, rpcUrl: rpcUrl);
   }
 
-  requestAuthentication() {
+  requestAuthentication({WalletProvider? walletProvider}) {
     _authenticationService.requestAuthentication(
+        walletProvider: walletProvider,
         onAuthStatusChanged: () async {
           notifyListeners();
           loadSkins();
@@ -59,14 +57,14 @@ class Web3Service extends ChangeNotifier {
 
   loadSkins({bool forceReload = false}) async {
     // Reload skins only if address changed
-    if (!_loadingSkins && (forceReload || skinOwnerAddress != authenticatedAddress)) {
+    if (!_loadingSkins && (forceReload || skinOwnerAddress != authenticatedAccount?.address)) {
       _loadingSkins = true;
-      await _authorizationService.loadSkinsForOwner(authenticatedAddress, onSkinsUpdated: (skins) {
+      await _authorizationService.loadSkinsForOwner(authenticatedAccount?.address, onSkinsUpdated: (skins) {
         skins?.sort((a, b) => a.tokenId.compareTo(b.tokenId),);
         this.skins = skins;
         notifyListeners();
       });
-      skinOwnerAddress = authenticatedAddress;
+      skinOwnerAddress = authenticatedAccount?.address;
       _loadingSkins = false;
       notifyListeners();
     }
