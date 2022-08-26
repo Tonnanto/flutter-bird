@@ -22,7 +22,7 @@ abstract class AuthenticationService {
   bool get isAuthenticated;
   String? get webQrData;
 
-  requestAuthentication({WalletProvider? walletProvider, Function()? onAuthStatusChanged});
+  requestAuthentication({WalletProvider? walletProvider});
   unauthenticate();
 }
 
@@ -33,6 +33,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
   final int operatingChain;
   WalletConnect? _connector;
+  Function() onAuthStatusChanged;
 
   @override
   String get operatingChainName => operatingChain == 5 ? "Goerli Testnet" : "Chain $operatingChain";
@@ -56,6 +57,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
   AuthenticationServiceImpl({
     required this.operatingChain,
+    required this.onAuthStatusChanged,
   }) {
     if (kIsWeb) {
       requestAuthentication();
@@ -73,10 +75,10 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
   /// Prompts user to authenticate with a wallet
   @override
-  requestAuthentication({WalletProvider? walletProvider, Function()? onAuthStatusChanged}) async {
+  requestAuthentication({WalletProvider? walletProvider}) async {
 
     // Create fresh connector
-    _createConnector(onConnectionStatusChanged: onAuthStatusChanged);
+    await _createConnector(walletProvider: walletProvider);
 
     // Create a new session
     if (!isConnected) {
@@ -86,32 +88,40 @@ class AuthenticationServiceImpl implements AuthenticationService {
             // Launches Wallet App (Metamask)
             if (kIsWeb) {
               webQrData = uri;
-              onAuthStatusChanged?.call();
+              onAuthStatusChanged();
             } else {
               _launchWallet(wallet: walletProvider, uri: uri);
             }
           }
       );
 
-      onAuthStatusChanged?.call();
+      onAuthStatusChanged();
     }
   }
 
   /// Send request to the users wallet to sign a message
   /// User will be authenticated if the signature could be verified
-  Future<bool> _verifySignature() async {
-    String? address = _connector?.session.accounts.first;
-    int? chainId = _connector?.session.chainId;
-    if (address == null || chainId == null) return false;
+  Future<bool> _verifySignature({WalletProvider? walletProvider, String? address}) async {
 
-    String messageText = "Please sign this message to authenticate with FlutterBird.";
+    int? chainId = _connector?.session.chainId;
+    if (address == null || chainId == null || !isOnOperatingChain) return false;
+
+    if (!kIsWeb) {
+      // Launch wallet app if on mobile
+      // Delay to make sure FlutterBird is in foreground again before launching wallet ap  again
+      await Future.delayed(const Duration(seconds: 1));
+      _launchWallet(wallet: walletProvider, uri: _connector!.session.toUri());
+    }
+
+    log("Signing message...", name: "AuthenticationService");
 
     // Let Crypto-Wallet sign custom message
+    String messageText = "Please sign this message to authenticate with FlutterBird.";
     final String signature = await _connector?.sendCustomRequest(
         method: "personal_sign",
         params: [
+          messageText,
           address,
-          messageText
         ]
     );
 
@@ -122,7 +132,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
     );
 
     // if initial address and recovered address are identical the message has been signed ith the correct private key
-    bool isAuthenticated =  recoveredAddress == address;
+    bool isAuthenticated = recoveredAddress.toLowerCase() == address.toLowerCase();
 
     // Set authenticated account
     _authenticatedAccount = isAuthenticated ? Account(
@@ -142,7 +152,8 @@ class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   /// Creates a WalletConnect Instance
-  _createConnector({Function()? onConnectionStatusChanged}) {
+  _createConnector({WalletProvider? walletProvider}) async {
+
     // Create WalletConnect Connector
     _connector = WalletConnect(
       bridge: 'https://bridge.walletconnect.org',
@@ -159,22 +170,22 @@ class AuthenticationServiceImpl implements AuthenticationService {
     // Subscribe to events
     _connector?.on('connect', (session) async {
       log('connected: ' + session.toString(), name: 'AuthenticationService');
+      String? address = _connector?.session.accounts.first;
       webQrData = null;
-      final authenticated = await _verifySignature();
+      final authenticated = await _verifySignature(walletProvider: walletProvider, address: address);
       if (authenticated) log('authenticated successfully: ' + session.toString(), name: 'AuthenticationService');
-      onConnectionStatusChanged?.call();
+      onAuthStatusChanged();
     });
     _connector?.on('session_update', (payload) async {
       log('session_update: ' + payload.toString(), name: 'AuthenticationService');
       webQrData = null;
-      await _verifySignature();
-      onConnectionStatusChanged?.call();
+      onAuthStatusChanged();
     });
     _connector?.on('disconnect', (session) {
       log('disconnect: ' + session.toString(), name: 'AuthenticationService');
       webQrData = null;
       _authenticatedAccount = null;
-      onConnectionStatusChanged?.call();
+      onAuthStatusChanged();
     });
   }
 

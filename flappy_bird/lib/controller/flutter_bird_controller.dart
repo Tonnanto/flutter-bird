@@ -36,17 +36,16 @@ class FlutterBirdController extends ChangeNotifier {
     const String skinContractAddress = flutterBirdSkinsContractAddress;
     String rpcUrl = "https://eth-goerli.g.alchemy.com/v2/$alchemyApiKey";
 
-    _authenticationService = AuthenticationServiceImpl(operatingChain: chainId);
+    _authenticationService = AuthenticationServiceImpl(operatingChain: chainId, onAuthStatusChanged: () async {
+      notifyListeners();
+      loadSkins();
+    });
     _authorizationService = AuthorizationServiceImpl(contractAddress: skinContractAddress, rpcUrl: rpcUrl);
   }
 
   requestAuthentication({WalletProvider? walletProvider}) {
     _authenticationService.requestAuthentication(
-        walletProvider: walletProvider,
-        onAuthStatusChanged: () async {
-          notifyListeners();
-          loadSkins();
-        }
+        walletProvider: walletProvider
     );
   }
 
