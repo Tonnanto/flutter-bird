@@ -82,7 +82,7 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
       body: Consumer<FlutterBirdController>(
           builder: (context, web3Service, child) {
 
-            web3Service.loadSkins();
+            web3Service.authorizeUser();
             if (web3Service.skins != null) {
               birds = [
                 const Bird(),

@@ -9,8 +9,6 @@ import '../model/skin.dart';
 import '../model/wallet_provider.dart';
 import 'authorization_service.dart';
 
-
-
 class FlutterBirdController extends ChangeNotifier {
 
   late final AuthenticationService _authenticationService;
@@ -45,7 +43,7 @@ class FlutterBirdController extends ChangeNotifier {
         walletProvider: walletProvider,
         onAuthStatusChanged: () async {
           notifyListeners();
-          loadSkins();
+          authorizeUser();
         }
     );
   }
@@ -55,11 +53,12 @@ class FlutterBirdController extends ChangeNotifier {
     notifyListeners();
   }
 
-  loadSkins({bool forceReload = false}) async {
+  /// Loads a users owned skins
+  authorizeUser({bool forceReload = false}) async {
     // Reload skins only if address changed
     if (!_loadingSkins && (forceReload || skinOwnerAddress != authenticatedAccount?.address)) {
       _loadingSkins = true;
-      await _authorizationService.loadSkinsForOwner(authenticatedAccount?.address, onSkinsUpdated: (skins) {
+      await _authorizationService.authorizeUser(authenticatedAccount?.address, onSkinsUpdated: (skins) {
         skins?.sort((a, b) => a.tokenId.compareTo(b.tokenId),);
         this.skins = skins;
         notifyListeners();

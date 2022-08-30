@@ -11,7 +11,7 @@ import '../model/skin.dart';
 /// communicating with smart contracts in order to get the owned NFTs
 abstract class AuthorizationService {
   Map<int, Skin>? get skins;
-  Future loadSkinsForOwner(String? ownerAddress, {Function(List<Skin>?)? onSkinsUpdated});
+  Future authorizeUser(String? ownerAddress, {Function(List<Skin>?)? onSkinsUpdated});
 }
 
 class AuthorizationServiceImpl implements AuthorizationService {
@@ -27,27 +27,24 @@ class AuthorizationServiceImpl implements AuthorizationService {
   });
 
   @override
-  Future loadSkinsForOwner(String? ownerAddress, {Function(List<Skin>?)? onSkinsUpdated}) async {
-    if (ownerAddress == null) {
+  Future authorizeUser(String? ethAddress, {Function(List<Skin>?)? onSkinsUpdated}) async {
+    if (ethAddress == null) {
       // Reset Skins
       skins = {};
       onSkinsUpdated?.call(skins?.values.toList());
       return;
     }
 
-    final client = Web3Client(rpcUrl, Client());
+    Web3Client client = Web3Client(rpcUrl, Client());
+    EthereumAddress address = EthereumAddress.fromHex(ethAddress);
 
     Flutterbirds contract = Flutterbirds(
-        address: EthereumAddress.fromHex(contractAddress),
+        address: address,
         client: client
     );
 
-    var _owner = EthereumAddress.fromHex(ownerAddress);
-
+    List<BigInt> tokenIds = await contract.getTokensForOwner(address);
     skins = {};
-
-    List<BigInt> tokenIds = await contract.getTokensForOwner(_owner);
-
     List<Future> futures = [];
 
     for (BigInt tokenId in tokenIds) {
@@ -75,8 +72,6 @@ class AuthorizationServiceImpl implements AuthorizationService {
   /// Uses the token URI to fetch the image file from IPFS
   /// @return the Skin Object with the correct image data
   Future<Skin?> getSkin(String tokenUri, int tokenId) async {
-    // Uri metadataUrl = Uri.parse('http://ipfs.io/ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/124');
-    // Uri metadataUrl = Uri.parse('https://nftstorage.link/ipfs/bafybeifx2zl5qv37gzwyc74f6ogjdeviz3azdgeinvqisnh23a2i35s7pm/405.json');
     Uri metadataUrl = Uri.parse(_ipfsUriToGateway(tokenUri));
 
     print(metadataUrl);
