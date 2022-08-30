@@ -13,10 +13,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<FlutterBirdController>(create: (BuildContext context) => FlutterBirdController()..init())
-      ],
+    return ChangeNotifierProvider(
+      create: (BuildContext context) => FlutterBirdController()..init(),
       child: MaterialApp(
         title: 'Flappy Bird',
         theme: ThemeData(
