@@ -1,0 +1,47 @@
+name: flutter_bird
+description: A Flappy Bird clone making use of NFTs
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.16.2 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  pixel_border: ^2.0.0-nullsafety.1
+  web3dart:
+  walletconnect_dart: ^0.0.11
+  eth_sig_util: ^0.0.9
+  url_launcher: ^6.1.4
+  provider: ^6.0.3
+  qr_flutter: ^4.0.0
+  http: ^0.13.4
+
+dev_dependencies:
+  flutter_launcher_icons: ^0.10.0
+  flutter_lints: ^1.0.0
+  shared_preferences: ^2.0.12
+  build_runner: ^2.1.11
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icon.png"
+    background_color: "#40C4FF"
+    theme_color: "#hexcode"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - images/
+    - assets/
+  fonts:
+    - family: flappy
+      fonts:
+        - asset: fonts/FlappyBirdRegular-9Pq0.ttf
