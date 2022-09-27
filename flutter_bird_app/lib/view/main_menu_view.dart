@@ -1,7 +1,7 @@
 
 import 'dart:math';
 
-import 'package:flutter_bird/view/wallet_popup.dart';
+import 'package:flutter_bird/view/authentication_popup.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,7 +9,7 @@ import 'package:pixel_border/pixel_border.dart';
 import 'package:provider/provider.dart';
 
 import '../extensions.dart';
-import 'game.dart';
+import 'game_view.dart';
 import '../controller/persistence/persistence_service.dart';
 import '../controller/flutter_bird_controller.dart';
 import 'widgets/background.dart';
@@ -54,7 +54,7 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
     HapticFeedback.lightImpact();
 
     Navigator.of(context).push(PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => FlutterBirdGame(
+      pageBuilder: (context, animation, secondaryAnimation) => GameView(
           bird: birds[selectedBird],
           birdSize: birdSize,
           worldDimensions: worldDimensions,
@@ -311,7 +311,7 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
     Navigator.of(context).push(PageRouteBuilder(
       opaque: false,
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-        return const WalletPopup();
+        return const AuthenticationPopup();
       },
       transitionDuration: const Duration(milliseconds: 150),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {

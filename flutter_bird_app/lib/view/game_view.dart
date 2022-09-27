@@ -11,8 +11,8 @@ import 'widgets/background.dart';
 import 'widgets/bird.dart';
 import 'widgets/flappy_text.dart';
 
-class FlutterBirdGame extends StatefulWidget {
-  const FlutterBirdGame({
+class GameView extends StatefulWidget {
+  const GameView({
     Key? key,
     required this.bird,
     required this.birdSize,
@@ -26,10 +26,10 @@ class FlutterBirdGame extends StatefulWidget {
   final Function(int score) onGameOver;
 
   @override
-  State<FlutterBirdGame> createState() => _FlutterBirdGameState();
+  State<GameView> createState() => _GameViewState();
 }
 
-class _FlutterBirdGameState extends State<FlutterBirdGame> {
+class _GameViewState extends State<GameView> {
 
   /// ++++++++++++++++++++++++ GAME STATE (MODEL) ++++++++++++++++++++++++++++
 

@@ -14,6 +14,7 @@ import 'package:walletconnect_dart/walletconnect_dart.dart';
 import '../../model/account.dart';
 import '../../model/wallet_provider.dart';
 
+/// Manages the authentication process and communication with crypto wallets
 abstract class AuthenticationService {
   List<WalletProvider> get availableWallets;
   Account? get authenticatedAccount;

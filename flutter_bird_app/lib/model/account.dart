@@ -1,4 +1,5 @@
 
+/// Represents an Ethereum Account
 class Account {
   final String address;
   final int chainId;

@@ -7,16 +7,16 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../controller/flutter_bird_controller.dart';
 import '../model/wallet_provider.dart';
 
-class WalletPopup extends StatefulWidget {
-  const WalletPopup({
+class AuthenticationPopup extends StatefulWidget {
+  const AuthenticationPopup({
     Key? key
   }) : super(key: key);
 
   @override
-  State<WalletPopup> createState() => _WalletPopupState();
+  State<AuthenticationPopup> createState() => _AuthenticationPopupState();
 }
 
-class _WalletPopupState extends State<WalletPopup> {
+class _AuthenticationPopupState extends State<AuthenticationPopup> {
 
   String? uri;
 
