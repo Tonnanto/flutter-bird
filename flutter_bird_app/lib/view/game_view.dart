@@ -169,20 +169,41 @@ class _GameViewState extends State<GameView> {
     return Scaffold(
       body: GestureDetector(
         onTapDown: _jump,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-                maxWidth: widget.worldDimensions.width
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxWidth: widget.worldDimensions.width
+                ),
+                child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const Background(),
+                      _buildBird(),
+                      Positioned.fill(child: _buildGameCanvas()),
+                    ]
+                ),
+              ),
             ),
-            child: Stack(
-                alignment: Alignment.center,
+
+            // Workaround to clip Pipes when Game Canvas is padded on the sides (browser)
+            Positioned.fill(
+              child: Row(
                 children: [
-                  const Background(),
-                  _buildBird(),
-                  Positioned.fill(child: _buildGameCanvas()),
-                ]
-            ),
-          ),
+                  Expanded(flex: 1, child: Container(color: Colors.white,)),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: widget.worldDimensions.width
+                    ),
+                    child: Container(),
+                  ),
+                  Expanded(flex: 1, child: Container(color: Colors.white,)),
+                ],
+              ),
+            )
+          ]
         ),
       ),
     );
@@ -218,7 +239,7 @@ class _GameViewState extends State<GameView> {
                   // Pipes
                   if (timer != null)
                     ...pipes.map((element) {
-                      return AnimatedContainer(
+                      return AnimatedAlign(
                           duration: const Duration(milliseconds: 0),
                           alignment: Alignment((element.passTick - timer!.tick) * 3 / speed, 0),
                           child: element
