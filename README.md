@@ -1,4 +1,7 @@
 
+
+![Flutter Bird Cover](media/cover.png)
+
 # Flutter Bird (Prototype)
 
 **TL;DR** A decentralized Flappy Bird clone making use of NFTs.
@@ -51,5 +54,83 @@ It has been deployed on the Ethereum Testnet "Goerli".
 
 ## Demo
 
-![Flutter Bird Demo](demo.gif)
+![Flutter Bird Demo](media/demo.gif)
 
+
+## Build and Run Locally
+
+### Prerequisites:
+- [Install Flutter](https://docs.flutter.dev/get-started/install)
+- Setup your own [Alchemy Supernode](https://www.alchemy.com/supernode) (free plan)
+
+### Steps:
+
+1. Clone project
+
+```bash
+git clone https://github.com/Tonnanto/flutter-bird
+```
+
+
+2. Create `secrets.dart` file at `flutter_bird_app/lib/secrets.dart`.
+3. Add the following contents to the file and insert your alchemy api key:
+
+```
+const flutterBirdSkinsContractAddress = "0x387f544E4c3B2351d015dF57c30831Ad58D6C798";
+const alchemyApiKey = "YOUR_ALCHEMY_API_KEY";
+```
+
+4. Go to apps directory
+
+```bash
+cd flutter-bird/flutter_bird_app
+```
+
+5. Install dependencies
+
+```bash
+flutter pub get
+```
+
+6. Run app on an available device.  
+   Hint: Use an IDE to comfortably connect real mobile devices or mobile simulators. Browsers should be available by default.
+
+```bash
+flutter install
+```
+
+### Troubleshooting:
+```bash
+flutter doctor
+```
+```bash
+flutter analyze
+```
+More info [here](https://docs.flutter.dev/reference/flutter-cli)
+
+
+## Mint Skin-NFT
+
+In order to use a Flutter Bird Skin in the game you need to mint one first.
+
+### Prerequisites:
+- Set up an Account on the Goerli-Blockchain (Use MetaMask for example).
+- Deposit some free GTH in your Account with a Faucet (0.01 GTH + Gas per Skin).
+
+### Steps:
+
+1. Visit the [contracts page](https://goerli.etherscan.io/address/0x387f544e4c3b2351d015df57c30831ad58d6c798#readContract) on etherscan.
+
+2. Find a skin that has not been minted by entering values between 0 and 999 in the [`ownerOf`](https://goerli.etherscan.io/address/0x387f544e4c3b2351d015df57c30831ad58d6c798#readContract#F8) function.
+   If it returns an error, the skin has not been minted and you can proceed to the next step.
+   If no skin is available, you have to buy one on a secondary market like [OpenSea](https://testnets.opensea.io/collection/flutterbirdskins).
+
+3. Go to [Write Contract](https://goerli.etherscan.io/address/0x387f544e4c3b2351d015df57c30831ad58d6c798#writeContract)
+
+4. Click "Connect to Web3" and connect your wallet.
+
+5. Use the [`mintSkin`](https://goerli.etherscan.io/address/0x387f544e4c3b2351d015df57c30831ad58d6c798#writeContract#F2) function and enter 0.01 as the `payableAmount`, and the token ID from step 2 as the `newTokenId`
+
+6. Click "Write" and confirm and sign the transaction with your wallet.
+
+7. Once the transaction is successful, you have successfully minted a skin that you can use in the Flutter Bird App.
