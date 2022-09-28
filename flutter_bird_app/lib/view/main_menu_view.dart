@@ -5,7 +5,6 @@ import 'package:flutter_bird/view/authentication_popup.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pixel_border/pixel_border.dart';
 import 'package:provider/provider.dart';
 
 import '../extensions.dart';
@@ -154,16 +153,14 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
   Widget _buildPlayButton() => GestureDetector(
     onTap: _startGame,
     child: Container(
-      decoration: ShapeDecoration(
-          shape: PixelBorder.solid(
-            borderRadius: BorderRadius.circular(9.0),
-            color: Colors.white,
-            pixelSize: 3,
-          ),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
           color: Colors.white,
-          shadows: const [
+          boxShadow: const [
             BoxShadow(
-                offset: Offset(3, 3)
+              color: Colors.black26,
+              blurRadius: 4,
+              offset: Offset(2, 2),
             )
           ]
       ),
