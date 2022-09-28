@@ -1,9 +1,6 @@
-
-
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:flutter/foundation.dart';
@@ -17,18 +14,23 @@ import '../../model/wallet_provider.dart';
 /// Manages the authentication process and communication with crypto wallets
 abstract class AuthenticationService {
   List<WalletProvider> get availableWallets;
+
   Account? get authenticatedAccount;
+
   String get operatingChainName;
+
   bool get isOnOperatingChain;
+
   bool get isAuthenticated;
+
   String? get webQrData;
 
   requestAuthentication({WalletProvider? walletProvider});
+
   unauthenticate();
 }
 
 class AuthenticationServiceImpl implements AuthenticationService {
-
   @override
   late final List<WalletProvider> availableWallets;
 
@@ -45,12 +47,13 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
   @override
   bool get isOnOperatingChain => currentChain == operatingChain;
+
   int? get currentChain => _connector?.session.chainId;
 
   @override
   bool get isAuthenticated => isConnected && authenticatedAccount != null;
-  bool get isConnected => _connector?.connected ?? false;
 
+  bool get isConnected => _connector?.connected ?? false;
 
   // The data to display in a QR Code for connections on Desktop / Browser.
   @override
@@ -77,7 +80,6 @@ class AuthenticationServiceImpl implements AuthenticationService {
   /// Prompts user to authenticate with a wallet
   @override
   requestAuthentication({WalletProvider? walletProvider}) async {
-
     // Create fresh connector
     await _createConnector(walletProvider: walletProvider);
 
@@ -93,8 +95,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
             } else {
               _launchWallet(wallet: walletProvider, uri: uri);
             }
-          }
-      );
+          });
 
       onAuthStatusChanged();
     }
@@ -103,43 +104,34 @@ class AuthenticationServiceImpl implements AuthenticationService {
   /// Send request to the users wallet to sign a message
   /// User will be authenticated if the signature could be verified
   Future<bool> _verifySignature({WalletProvider? walletProvider, String? address}) async {
-
     int? chainId = _connector?.session.chainId;
     if (address == null || chainId == null || !isOnOperatingChain) return false;
 
     if (!kIsWeb) {
       // Launch wallet app if on mobile
-      // Delay to make sure FlutterBird is in foreground again before launching wallet ap  again
+      // Delay to make sure FlutterBird is in foreground before launching wallet app again
       await Future.delayed(const Duration(seconds: 1));
       _launchWallet(wallet: walletProvider, uri: _connector!.session.toUri());
     }
 
     log("Signing message...", name: "AuthenticationService");
 
-    // Let Crypto-Wallet sign custom message
+    // Let Crypto Wallet sign custom message
     String messageText = "Please sign this message to authenticate with FlutterBird.";
-    final String signature = await _connector?.sendCustomRequest(
-        method: "personal_sign",
-        params: [
-          messageText,
-          address,
-        ]
-    );
+    final String signature = await _connector?.sendCustomRequest(method: "personal_sign", params: [
+      messageText,
+      address,
+    ]);
 
     // Check if signature is valid by recovering the exact address from message and signature
     String recoveredAddress = EthSigUtil.recoverPersonalSignature(
-        signature: signature,
-        message: Uint8List.fromList(utf8.encode(messageText))
-    );
+        signature: signature, message: Uint8List.fromList(utf8.encode(messageText)));
 
-    // if initial address and recovered address are identical the message has been signed ith the correct private key
+    // if initial address and recovered address are identical the message has been signed with the correct private key
     bool isAuthenticated = recoveredAddress.toLowerCase() == address.toLowerCase();
 
     // Set authenticated account
-    _authenticatedAccount = isAuthenticated ? Account(
-      address: recoveredAddress,
-      chainId: chainId
-    ) : null;
+    _authenticatedAccount = isAuthenticated ? Account(address: recoveredAddress, chainId: chainId) : null;
 
     return isAuthenticated;
   }
@@ -154,7 +146,6 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
   /// Creates a WalletConnect Instance
   _createConnector({WalletProvider? walletProvider}) async {
-
     // Create WalletConnect Connector
     _connector = WalletConnect(
       bridge: 'https://bridge.walletconnect.org',
@@ -194,25 +185,21 @@ class AuthenticationServiceImpl implements AuthenticationService {
     WalletProvider? wallet,
     required String uri,
   }) async {
-
     if (wallet == null) {
       launchUrl(Uri.parse(uri));
       return;
     }
 
-    if (wallet.universal != null &&
-        await canLaunchUrl(Uri.parse(wallet.universal!))) {
+    if (wallet.universal != null && await canLaunchUrl(Uri.parse(wallet.universal!))) {
       await launchUrl(
         _convertToWcUri(appLink: wallet.universal!, wcUri: uri),
         mode: LaunchMode.externalApplication,
       );
-    } else if (wallet.native != null &&
-        await canLaunchUrl(Uri.parse(wallet.native!))) {
+    } else if (wallet.native != null && await canLaunchUrl(Uri.parse(wallet.native!))) {
       await launchUrl(
         _convertToWcUri(appLink: wallet.native!, wcUri: uri),
       );
     } else {
-
       if (Platform.isIOS && wallet.iosLink != null) {
         await launchUrl(Uri.parse(wallet.iosLink!));
       } else if (Platform.isAndroid && wallet.androidLink != null) {
@@ -224,5 +211,6 @@ class AuthenticationServiceImpl implements AuthenticationService {
   Uri _convertToWcUri({
     required String appLink,
     required String wcUri,
-  }) => Uri.parse('$appLink/wc?uri=${Uri.encodeComponent(wcUri)}');
+  }) =>
+      Uri.parse('$appLink/wc?uri=${Uri.encodeComponent(wcUri)}');
 }

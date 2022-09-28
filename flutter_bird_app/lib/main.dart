@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bird/controller/flutter_bird_controller.dart';
 import 'package:flutter_bird/view/main_menu_view.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {

@@ -1,4 +1,3 @@
-
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -13,8 +12,10 @@ class Pipe extends StatelessWidget {
 
   // Value between 0 and 2
   static double width = 0.25;
+
   // Value between 0 and 2
   final double space = 0.6;
+
   // Value between -1.0 and 1.0
   final double height;
 
@@ -22,6 +23,7 @@ class Pipe extends StatelessWidget {
 
   // Game tick on which this pipe is passed
   final int passTick;
+
   // Flag indicating whether this pipe has already scored a point
   // bool passed = false;
 
@@ -30,7 +32,6 @@ class Pipe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     double height = max(this.height, -0.9 + space / 2);
     height = min(height, 0.9 - space / 2);
 
@@ -43,33 +44,25 @@ class Pipe extends StatelessWidget {
     return SizedBox(
       width: worldDimensions.width / (2 / width),
       child: Column(
-          children: [
-            Container(
-              key: topPipeKey,
-              decoration: const BoxDecoration(
+        children: [
+          Container(
+            key: topPipeKey,
+            decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage("images/pipe_top.png"),
-                  alignment: Alignment.bottomCenter,
-                  fit: BoxFit.cover
-                ),
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(2), bottomRight: Radius.circular(2))
-              ),
-              height: topHeight,
-            ),
-            const Spacer(),
-            Container(
-              key: bottomPipeKey,
-              decoration: const BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage("images/pipe_bottom.png"),
-                      alignment: Alignment.topCenter,
-                      fit: BoxFit.cover
-                  ),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))
-              ),
-              height: bottomHeight,
-            )
-          ],
+                    image: AssetImage("images/pipe_top.png"), alignment: Alignment.bottomCenter, fit: BoxFit.cover),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(2), bottomRight: Radius.circular(2))),
+            height: topHeight,
+          ),
+          const Spacer(),
+          Container(
+            key: bottomPipeKey,
+            decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage("images/pipe_bottom.png"), alignment: Alignment.topCenter, fit: BoxFit.cover),
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))),
+            height: bottomHeight,
+          )
+        ],
       ),
     );
   }
@@ -91,7 +84,7 @@ class Pipe extends StatelessWidget {
     final topPipeSize = topPipe.paintBounds.size;
     final bottomPipeSize = bottomPipe.paintBounds.size;
 
-    final birdPosition = bird.localToGlobal(Offset(birdOffsetX, birdOffsetY));//Offset.zero);
+    final birdPosition = bird.localToGlobal(Offset(birdOffsetX, birdOffsetY)); //Offset.zero);
     final topPipePosition = topPipe.localToGlobal(Offset.zero);
     final bottomPipePosition = bottomPipe.localToGlobal(Offset.zero);
 

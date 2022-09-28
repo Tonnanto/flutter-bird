@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class FlappyText extends StatelessWidget {
@@ -22,7 +21,7 @@ class FlappyText extends StatelessWidget {
     // Replace 0 and 1 because they look like 8 and 7
     String text = this.text.replaceAll("1", "l").replaceAll("0", "O");
     return Stack(
-      // Workaround: Two Texts to give title outline + shadow
+        // Workaround: Two Texts to give title outline + shadow
         children: [
           Text(
             text,
@@ -35,12 +34,8 @@ class FlappyText extends StatelessWidget {
                   ..strokeWidth = strokeWidth ?? 4
                   ..color = Colors.grey.shade800,
                 shadows: [
-                  Shadow(
-                      offset: Offset((strokeWidth ?? 4) - 1, (strokeWidth ?? 4) - 1),
-                      color: Colors.grey.shade800
-                  )
-                ]
-            ),
+                  Shadow(offset: Offset((strokeWidth ?? 4) - 1, (strokeWidth ?? 4) - 1), color: Colors.grey.shade800)
+                ]),
             textAlign: textAlign,
           ),
           Text(
@@ -53,7 +48,6 @@ class FlappyText extends StatelessWidget {
             ),
             textAlign: textAlign,
           ),
-        ]
-    );
+        ]);
   }
 }

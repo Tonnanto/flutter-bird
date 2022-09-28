@@ -1,4 +1,3 @@
-
 /// Represents a compatible Wallet Provider
 class WalletProvider {
   final String id;

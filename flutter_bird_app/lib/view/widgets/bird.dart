@@ -1,17 +1,17 @@
-
 import 'package:flutter/material.dart';
 
 import '../../model/skin.dart';
 
 class Bird extends StatelessWidget {
-
   const Bird({
     Key? key,
     this.skin,
   }) : super(key: key);
 
   final Skin? skin;
+
   bool get isLoading => skin != null && skin!.imageLocation == null;
+
   String get name => skin?.tokenId != null ? ("#${skin!.tokenId}") : "";
 
   @override
@@ -28,22 +28,24 @@ class Bird extends StatelessWidget {
       skin!.imageLocation!,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
-        return _buildLoadingIndicator(context, loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1000));
+        return _buildLoadingIndicator(
+            context, loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1000));
       },
     );
   }
 
   _buildLoadingIndicator(BuildContext context, double? value) => Column(
-    mainAxisAlignment: MainAxisAlignment.spaceAround,
-    children: [
-      CircularProgressIndicator(
-        color: Colors.white,
-        value: value,),
-      Text(
-        "loading from\nIPFS...",
-        textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.caption,
-      )
-    ],
-  );
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          CircularProgressIndicator(
+            color: Colors.white,
+            value: value,
+          ),
+          Text(
+            "loading from\nIPFS...",
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.caption,
+          )
+        ],
+      );
 }

@@ -1,26 +1,30 @@
-
-import 'package:flutter_bird/secrets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bird/controller/authentication_service.dart';
 import 'package:flutter_bird/controller/authorization_service.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter_bird/secrets.dart';
 
 import '../model/account.dart';
 import '../model/skin.dart';
 import '../model/wallet_provider.dart';
-import 'authorization_service.dart';
 
 class FlutterBirdController extends ChangeNotifier {
-
   late final AuthenticationService _authenticationService;
   late final AuthorizationService _authorizationService;
 
   // Authentication state
   List<WalletProvider> get availableWallets => _authenticationService.availableWallets;
+
   Account? get authenticatedAccount => _authenticationService.authenticatedAccount;
+
   bool get isOnOperatingChain => _authenticationService.isOnOperatingChain;
+
   String get operatingChainName => _authenticationService.operatingChainName;
+
   bool get isAuthenticated => _authenticationService.isAuthenticated;
-  String? get currentAddressShort => "${authenticatedAccount?.address.substring(0, 8)}...${authenticatedAccount?.address.substring(36)}";
+
+  String? get currentAddressShort =>
+      "${authenticatedAccount?.address.substring(0, 8)}...${authenticatedAccount?.address.substring(36)}";
+
   String? get webQrData => _authenticationService.webQrData;
   bool _loadingSkins = false;
 
@@ -29,22 +33,22 @@ class FlutterBirdController extends ChangeNotifier {
   String? skinOwnerAddress;
 
   init() {
-    /// Setting Up Web3 Connection
-    const int chainId = 5; // Görli Testnet
+    // Setting Up Web3 Connection
+    const int chainId = 5; // Goerli Testnet
     const String skinContractAddress = flutterBirdSkinsContractAddress;
     String rpcUrl = "https://eth-goerli.g.alchemy.com/v2/$alchemyApiKey";
 
-    _authenticationService = AuthenticationServiceImpl(operatingChain: chainId, onAuthStatusChanged: () async {
-      notifyListeners();
-      authorizeUser();
-    });
+    _authenticationService = AuthenticationServiceImpl(
+        operatingChain: chainId,
+        onAuthStatusChanged: () async {
+          notifyListeners();
+          authorizeUser();
+        });
     _authorizationService = AuthorizationServiceImpl(contractAddress: skinContractAddress, rpcUrl: rpcUrl);
   }
 
   requestAuthentication({WalletProvider? walletProvider}) {
-    _authenticationService.requestAuthentication(
-        walletProvider: walletProvider
-    );
+    _authenticationService.requestAuthentication(walletProvider: walletProvider);
   }
 
   unauthenticate() {
@@ -58,7 +62,9 @@ class FlutterBirdController extends ChangeNotifier {
     if (!_loadingSkins && (forceReload || skinOwnerAddress != authenticatedAccount?.address)) {
       _loadingSkins = true;
       await _authorizationService.authorizeUser(authenticatedAccount?.address, onSkinsUpdated: (skins) {
-        skins?.sort((a, b) => a.tokenId.compareTo(b.tokenId),);
+        skins?.sort(
+          (a, b) => a.tokenId.compareTo(b.tokenId),
+        );
         this.skins = skins;
         notifyListeners();
       });

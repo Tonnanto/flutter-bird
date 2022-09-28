@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
@@ -11,11 +12,11 @@ import '../model/skin.dart';
 /// communicating with smart contracts in order to get the owned NFTs
 abstract class AuthorizationService {
   Map<int, Skin>? get skins;
+
   Future authorizeUser(String? ownerAddress, {Function(List<Skin>?)? onSkinsUpdated});
 }
 
 class AuthorizationServiceImpl implements AuthorizationService {
-
   @override
   Map<int, Skin>? skins;
   final String contractAddress;
@@ -39,17 +40,13 @@ class AuthorizationServiceImpl implements AuthorizationService {
     EthereumAddress ownerAdr = EthereumAddress.fromHex(ethAddress);
     EthereumAddress contractAdr = EthereumAddress.fromHex(contractAddress);
 
-    Flutterbirds contract = Flutterbirds(
-        address: contractAdr,
-        client: client
-    );
+    Flutterbirds contract = Flutterbirds(address: contractAdr, client: client);
 
     List<BigInt> tokenIds = await contract.getTokensForOwner(ownerAdr);
     skins = {};
     List<Future> futures = [];
 
     for (BigInt tokenId in tokenIds) {
-
       // Populate with placeholder Skin until metadata is loaded
       String skinName = "Flutter Bird #$tokenId";
       skins?[tokenId.toInt()] = Skin(name: skinName, tokenId: tokenId.toInt());
@@ -75,8 +72,6 @@ class AuthorizationServiceImpl implements AuthorizationService {
   Future<Skin?> getSkin(String tokenUri, int tokenId) async {
     Uri metadataUrl = Uri.parse(_ipfsUriToGateway(tokenUri));
 
-    print(metadataUrl);
-
     try {
       Response? metadataResponse = await http.get(metadataUrl);
       Map<String, dynamic> metadata = jsonDecode(metadataResponse.body);
@@ -85,23 +80,13 @@ class AuthorizationServiceImpl implements AuthorizationService {
       String imageIpfsUri = metadata["image"];
       String imageUrl = _ipfsUriToGateway(imageIpfsUri);
 
-      print(imageUrl);
-
-      return Skin(
-        tokenId: tokenId,
-        name: skinName,
-        imageLocation: imageUrl
-      );
-
+      return Skin(tokenId: tokenId, name: skinName, imageLocation: imageUrl);
     } on Exception catch (e) {
-      print("Failed to load metadata for tokenURI $tokenUri");
-      print(e);
+      log("Failed to load metadata for tokenURI $tokenUri");
+      log(e.toString());
     }
     return null;
   }
 
-  // "https://gateway.pinata.cloud/ipfs/"
-  // "http://ipfs.io/ipfs/"
-  // "https://nftstorage.link/ipfs/"
   String _ipfsUriToGateway(String ipfsUri) => "https://nftstorage.link/ipfs/" + ipfsUri.substring(7);
 }

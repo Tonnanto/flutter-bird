@@ -1,11 +1,9 @@
-
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_bird/view/widgets/pipe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bird/view/widgets/pipe.dart';
 
 import 'widgets/background.dart';
 import 'widgets/bird.dart';
@@ -30,7 +28,6 @@ class GameView extends StatefulWidget {
 }
 
 class _GameViewState extends State<GameView> {
-
   /// ++++++++++++++++++++++++ GAME STATE (MODEL) ++++++++++++++++++++++++++++
 
   final GlobalKey birdKey = GlobalKey();
@@ -40,6 +37,7 @@ class _GameViewState extends State<GameView> {
 
   // ticks between two pipes (smaller -> more pipes)
   static int ticksPerPipe = 100;
+
   // ticks until a spawned pipe reaches bird (smaller -> faster)
   static int speed = 220;
 
@@ -47,6 +45,7 @@ class _GameViewState extends State<GameView> {
   double jumpTime = 0;
   double initialJumpHeight = 0;
   double jumpHeight = 0;
+
   // inclination of jump used for bird rotation
   double jumpDirection = 0;
   int score = 0;
@@ -55,9 +54,9 @@ class _GameViewState extends State<GameView> {
   int lastPipe = 0;
 
   List<Pipe> pipes = [];
+
   // used to determine when points are gained
   List<int> upcomingPipeTicks = [];
-
 
   /// ++++++++++++++++++++++++ GAME LOGIC (CONTROLLER) ++++++++++++++++++++++++++++
 
@@ -67,7 +66,6 @@ class _GameViewState extends State<GameView> {
     super.initState();
     score = 0;
     timer = Timer.periodic(const Duration(milliseconds: 15), (timer) {
-
       // render bird
       jumpTime += 0.0125;
       jumpHeight = -4.3 * jumpTime * jumpTime + 2.3 * jumpTime;
@@ -82,7 +80,9 @@ class _GameViewState extends State<GameView> {
       // update score
       if (upcomingPipeTicks.first < timer.tick) {
         upcomingPipeTicks.removeAt(0);
-        setState(() { ++score; });
+        setState(() {
+          ++score;
+        });
       }
 
       // check for collisions
@@ -115,7 +115,6 @@ class _GameViewState extends State<GameView> {
         Navigator.of(context).pop();
       });
     });
-
   }
 
   _jump(TapDownDetails _) {
@@ -169,101 +168,95 @@ class _GameViewState extends State<GameView> {
     return Scaffold(
       body: GestureDetector(
         onTapDown: _jump,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxWidth: widget.worldDimensions.width
-                ),
-                child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      const Background(),
-                      _buildBird(),
-                      Positioned.fill(child: _buildGameCanvas()),
-                    ]
-                ),
-              ),
+        child: Stack(alignment: Alignment.center, children: [
+          Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: widget.worldDimensions.width),
+              child: Stack(alignment: Alignment.center, children: [
+                const Background(),
+                _buildBird(),
+                Positioned.fill(child: _buildGameCanvas()),
+              ]),
             ),
+          ),
 
-            // Workaround to clip Pipes when Game Canvas is padded on the sides (browser)
-            Positioned.fill(
-              child: Row(
-                children: [
-                  Expanded(flex: 1, child: Container(color: Colors.white,)),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: widget.worldDimensions.width
-                    ),
-                    child: Container(),
-                  ),
-                  Expanded(flex: 1, child: Container(color: Colors.white,)),
-                ],
-              ),
-            )
-          ]
-        ),
+          // Workaround to clip Pipes when Game Canvas is padded on the sides (browser)
+          Positioned.fill(
+            child: Row(
+              children: [
+                Expanded(
+                    flex: 1,
+                    child: Container(
+                      color: Colors.white,
+                    )),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: widget.worldDimensions.width),
+                  child: Container(),
+                ),
+                Expanded(
+                    flex: 1,
+                    child: Container(
+                      color: Colors.white,
+                    )),
+              ],
+            ),
+          )
+        ]),
       ),
     );
   }
 
   Widget _buildBird() => Column(
-    children: [
-      Expanded(
-        flex: 3,
-        child: AnimatedContainer(
-            duration: const Duration(milliseconds: 0),
-            alignment: Alignment(0, birdY),
-            child: Transform.rotate(angle: pi / 4 * (-jumpDirection / 6), child: SizedBox(
-              key: birdKey,
-              height: widget.birdSize,
-              width: widget.birdSize,
-              child: widget.bird,
-            ))
-        ),
-      ),
-      const Spacer()
-    ],
-  );
+        children: [
+          Expanded(
+            flex: 3,
+            child: AnimatedContainer(
+                duration: const Duration(milliseconds: 0),
+                alignment: Alignment(0, birdY),
+                child: Transform.rotate(
+                    angle: pi / 4 * (-jumpDirection / 6),
+                    child: SizedBox(
+                      key: birdKey,
+                      height: widget.birdSize,
+                      width: widget.birdSize,
+                      child: widget.bird,
+                    ))),
+          ),
+          const Spacer()
+        ],
+      );
 
   Widget _buildGameCanvas() {
     return Column(
       children: [
         Expanded(
             flex: 3,
-            child: Stack(
-                alignment: Alignment.center,
+            child: Stack(alignment: Alignment.center, children: [
+              // Pipes
+              if (timer != null)
+                ...pipes.map((element) {
+                  return AnimatedAlign(
+                      duration: const Duration(milliseconds: 0),
+                      alignment: Alignment((element.passTick - timer!.tick) * 3 / speed, 0),
+                      child: element);
+                }).toList(),
+
+              // Score
+              Column(
                 children: [
-                  // Pipes
-                  if (timer != null)
-                    ...pipes.map((element) {
-                      return AnimatedAlign(
-                          duration: const Duration(milliseconds: 0),
-                          alignment: Alignment((element.passTick - timer!.tick) * 3 / speed, 0),
-                          child: element
-                      );
-                    }).toList(),
-
-                  // Score
-                  Column(
-                    children: [
-                      const Spacer(flex: 1,),
-                      FlappyText(
-                        text: score.toString(),
-                      ),
-                      const Spacer(flex: 6,),
-                    ],
+                  const Spacer(
+                    flex: 1,
                   ),
-
-                ]
-            )
-        ),
-        Expanded(
-            flex: 1,
-            child: Container()
-        )
+                  FlappyText(
+                    text: score.toString(),
+                  ),
+                  const Spacer(
+                    flex: 6,
+                  ),
+                ],
+              ),
+            ])),
+        Expanded(flex: 1, child: Container())
       ],
     );
   }

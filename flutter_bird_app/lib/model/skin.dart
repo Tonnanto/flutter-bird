@@ -1,4 +1,3 @@
-
 /// Represents a Flutter Bird Skin NFT
 class Skin {
   final int tokenId;

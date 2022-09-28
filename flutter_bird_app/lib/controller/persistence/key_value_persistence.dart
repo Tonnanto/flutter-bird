@@ -6,9 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'persistence_service.dart';
 
 class LocalKeyValuePersistence implements Repository {
-  
   static String flappyKey = 'flappy_key';
-  
+
   String _generateKey(String key) {
     return key;
   }
