@@ -36,14 +36,15 @@ class AuthorizationServiceImpl implements AuthorizationService {
     }
 
     Web3Client client = Web3Client(rpcUrl, Client());
-    EthereumAddress address = EthereumAddress.fromHex(ethAddress);
+    EthereumAddress ownerAdr = EthereumAddress.fromHex(ethAddress);
+    EthereumAddress contractAdr = EthereumAddress.fromHex(contractAddress);
 
     Flutterbirds contract = Flutterbirds(
-        address: address,
+        address: contractAdr,
         client: client
     );
 
-    List<BigInt> tokenIds = await contract.getTokensForOwner(address);
+    List<BigInt> tokenIds = await contract.getTokensForOwner(ownerAdr);
     skins = {};
     List<Future> futures = [];
 
@@ -77,10 +78,7 @@ class AuthorizationServiceImpl implements AuthorizationService {
     print(metadataUrl);
 
     try {
-      Response? metadataResponse = await http.get(metadataUrl, headers: {
-        "Accept": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      });
+      Response? metadataResponse = await http.get(metadataUrl);
       Map<String, dynamic> metadata = jsonDecode(metadataResponse.body);
 
       String skinName = metadata["name"];
