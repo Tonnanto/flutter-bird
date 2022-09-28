@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
 
   pixel_border: ^2.0.0-nullsafety.1
-  web3dart:
+  web3dart: ^2.3.5
   walletconnect_dart: ^0.0.11
   eth_sig_util: ^0.0.9
   url_launcher: ^6.1.4
