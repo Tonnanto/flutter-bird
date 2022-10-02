@@ -1,16 +1,11 @@
 {
   "devDependencies": {
     "@truffle/hdwallet-provider": "^2.0.10",
-    "@types/jest": "^23.3.12",
     "canvas": "^2.9.3",
     "dotenv": "^16.0.1",
-    "jest": "^28.1.2",
     "truffle-contract": "^4.0.31",
     "truffle-plugin-verify": "^0.5.26",
     "web3": "^1.7.4"
-  },
-  "scripts": {
-    "test": "jest"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.0"
