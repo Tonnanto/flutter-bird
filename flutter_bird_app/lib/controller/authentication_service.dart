@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:nonce/nonce.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
 
@@ -118,7 +120,8 @@ class AuthenticationServiceImpl implements AuthenticationService {
     log("Signing message...", name: "AuthenticationService");
 
     // Let Crypto Wallet sign custom message
-    String messageText = "Please sign this message to authenticate with FlutterBird.";
+    String nonce = Nonce.generate(32, math.Random.secure());
+    String messageText = "Please sign this message to authenticate with Flutter Bird.\nChallenge: $nonce";
     final String signature = await _connector?.sendCustomRequest(method: "personal_sign", params: [
       messageText,
       address,
