@@ -6,7 +6,7 @@
 
 **TL;DR** A decentralized Flappy Bird clone making use of NFTs.
 
-Flutter Bird immitates the icon minigame ["Flappy Bird"](https://en.wikipedia.org/wiki/Flappy_Bird) which domitated the AppStores in 2014.
+Flutter Bird imitates the minigame ["Flappy Bird"](https://en.wikipedia.org/wiki/Flappy_Bird) which domitated the AppStores in 2014.
 On top of that Flutter Bird adds one basic feature to the original game: The ability to play with alternative skins.
 These skins are realised as NFTs on the Ethereum Blockchain.
 The Purpose of Flutter Bird is to demonstrate the processes of an Ethereum Authentication and Authorization with NFTs within a Flutter Application.
@@ -35,7 +35,7 @@ It has been deployed on the Ethereum Testnet "Goerli".
 - Flappy Bird Clone
   - Play Flappy Bird
   - Track your Highscore
-- Authenticate using a Cryto Wallet and your Ethereum Account
+- Authenticate using a Crypto Wallet and your Ethereum Account
 - Use your *Flutter Bird Skin NFTs* to play the game
 
 
@@ -76,7 +76,6 @@ git clone https://github.com/Tonnanto/flutter-bird
 3. Add the following contents to the file and insert your alchemy api key:
 
 ```
-const flutterBirdSkinsContractAddress = "0x387f544E4c3B2351d015dF57c30831Ad58D6C798";
 const alchemyApiKey = "YOUR_ALCHEMY_API_KEY";
 ```
 
@@ -122,7 +121,7 @@ In order to use a Flutter Bird Skin in the game you need to mint one first.
 1. Visit the [contracts page](https://goerli.etherscan.io/address/0x387f544e4c3b2351d015df57c30831ad58d6c798#readContract) on etherscan.
 
 2. Find a skin that has not been minted by entering values between 0 and 999 in the [`ownerOf`](https://goerli.etherscan.io/address/0x387f544e4c3b2351d015df57c30831ad58d6c798#readContract#F8) function.
-   If it returns an error, the skin has not been minted and you can proceed to the next step.
+   If it returns an error, the skin has not been minted, and you can proceed to the next step.
    If no skin is available, you have to buy one on a secondary market like [OpenSea](https://testnets.opensea.io/collection/flutterbirdskins).
 
 3. Go to [Write Contract](https://goerli.etherscan.io/address/0x387f544e4c3b2351d015df57c30831ad58d6c798#writeContract)
