@@ -49,7 +49,7 @@ class Pipe extends StatelessWidget {
             key: topPipeKey,
             decoration: const BoxDecoration(
                 image: DecorationImage(
-                    image: AssetImage("images/pipe_top.png"), alignment: Alignment.bottomCenter, fit: BoxFit.cover),
+                    image: AssetImage('images/pipe_top.png'), alignment: Alignment.bottomCenter, fit: BoxFit.cover),
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(2), bottomRight: Radius.circular(2))),
             height: topHeight,
           ),
@@ -58,7 +58,7 @@ class Pipe extends StatelessWidget {
             key: bottomPipeKey,
             decoration: const BoxDecoration(
                 image: DecorationImage(
-                    image: AssetImage("images/pipe_bottom.png"), alignment: Alignment.topCenter, fit: BoxFit.cover),
+                    image: AssetImage('images/pipe_bottom.png'), alignment: Alignment.topCenter, fit: BoxFit.cover),
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))),
             height: bottomHeight,
           )

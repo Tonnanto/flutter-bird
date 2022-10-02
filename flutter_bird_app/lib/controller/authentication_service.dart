@@ -42,7 +42,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
   Function() onAuthStatusChanged;
 
   @override
-  String get operatingChainName => operatingChain == 5 ? "Goerli Testnet" : "Chain $operatingChain";
+  String get operatingChainName => operatingChain == 5 ? 'Goerli Testnet' : 'Chain $operatingChain';
 
   @override
   Account? get authenticatedAccount => _authenticatedAccount;
@@ -117,12 +117,12 @@ class AuthenticationServiceImpl implements AuthenticationService {
       _launchWallet(wallet: walletProvider, uri: _connector!.session.toUri());
     }
 
-    log("Signing message...", name: "AuthenticationService");
+    log('Signing message...', name: 'AuthenticationService');
 
     // Let Crypto Wallet sign custom message
     String nonce = Nonce.generate(32, math.Random.secure());
-    String messageText = "Please sign this message to authenticate with Flutter Bird.\nChallenge: $nonce";
-    final String signature = await _connector?.sendCustomRequest(method: "personal_sign", params: [
+    String messageText = 'Please sign this message to authenticate with Flutter Bird.\nChallenge: $nonce';
+    final String signature = await _connector?.sendCustomRequest(method: 'personal_sign', params: [
       messageText,
       address,
     ]);
@@ -158,7 +158,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
         description: 'WalletConnect Developer App',
         url: 'https://flutterbird.com',
         icons: [
-          "https://raw.githubusercontent.com/Tonnanto/flutter-bird/v1.0/flutter_bird_app/assets/icon.png",
+          'https://raw.githubusercontent.com/Tonnanto/flutter-bird/v1.0/flutter_bird_app/assets/icon.png',
         ],
       ),
     );

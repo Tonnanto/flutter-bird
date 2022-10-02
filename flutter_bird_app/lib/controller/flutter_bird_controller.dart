@@ -24,7 +24,7 @@ class FlutterBirdController extends ChangeNotifier {
   bool get isAuthenticated => _authenticationService.isAuthenticated;
 
   String? get currentAddressShort =>
-      "${authenticatedAccount?.address.substring(0, 8)}...${authenticatedAccount?.address.substring(36)}";
+      '${authenticatedAccount?.address.substring(0, 8)}...${authenticatedAccount?.address.substring(36)}';
 
   String? get webQrData => _authenticationService.webQrData;
   bool _loadingSkins = false;

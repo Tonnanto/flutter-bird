@@ -49,7 +49,7 @@ class AuthorizationServiceImpl implements AuthorizationService {
 
     for (BigInt tokenId in tokenIds) {
       // Populate with placeholder Skin until metadata is loaded
-      String skinName = "Flutter Bird #$tokenId";
+      String skinName = 'Flutter Bird #$tokenId';
       skins?[tokenId.toInt()] = Skin(name: skinName, tokenId: tokenId.toInt());
       onSkinsUpdated?.call(skins?.values.toList());
 
@@ -77,13 +77,13 @@ class AuthorizationServiceImpl implements AuthorizationService {
       Response? metadataResponse = await http.get(metadataUrl);
       Map<String, dynamic> metadata = jsonDecode(metadataResponse.body);
 
-      String skinName = metadata["name"];
-      String imageIpfsUri = metadata["image"];
+      String skinName = metadata['name'];
+      String imageIpfsUri = metadata['image'];
       String imageUrl = _ipfsUriToGateway(imageIpfsUri);
 
       return Skin(tokenId: tokenId, name: skinName, imageLocation: imageUrl);
     } on Exception catch (e) {
-      log("Failed to load metadata for tokenURI $tokenUri");
+      log('Failed to load metadata for tokenURI $tokenUri');
       log(e.toString());
     }
     return null;

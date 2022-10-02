@@ -12,12 +12,12 @@ class Bird extends StatelessWidget {
 
   bool get isLoading => skin != null && skin!.imageLocation == null;
 
-  String get name => skin?.tokenId != null ? ("#${skin!.tokenId}") : "";
+  String get name => skin?.tokenId != null ? ('#${skin!.tokenId}') : '';
 
   @override
   Widget build(BuildContext context) {
     if (skin == null) {
-      return Image.asset("images/flappy_bird.png");
+      return Image.asset('images/flappy_bird.png');
     }
 
     if (skin?.imageLocation == null) {
@@ -42,7 +42,7 @@ class Bird extends StatelessWidget {
             value: value,
           ),
           Text(
-            "loading from\nIPFS...",
+            'loading from\nIPFS...',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.caption,
           )

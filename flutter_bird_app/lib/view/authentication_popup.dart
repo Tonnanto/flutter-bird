@@ -91,14 +91,14 @@ class _AuthenticationPopupState extends State<AuthenticationPopup> {
       );
 
   _buildAuthenticationStatusView(FlutterBirdController flutterBirdController) {
-    String statusText = "Not Authenticated";
+    String statusText = 'Not Authenticated';
     if (flutterBirdController.isAuthenticated) {
-      statusText = flutterBirdController.isOnOperatingChain ? "Authenticated" : "\nAuthenticated on wrong chain";
+      statusText = flutterBirdController.isOnOperatingChain ? 'Authenticated' : '\nAuthenticated on wrong chain';
     }
     return Column(
       children: [
         Text(
-          "Status: $statusText",
+          'Status: $statusText',
           style: Theme.of(context).textTheme.headline6,
         ),
         if (!flutterBirdController.isOnOperatingChain)
@@ -107,7 +107,7 @@ class _AuthenticationPopupState extends State<AuthenticationPopup> {
           ),
         if (!flutterBirdController.isOnOperatingChain)
           Text(
-            "Connect a wallet on ${flutterBirdController.operatingChainName}",
+            'Connect a wallet on ${flutterBirdController.operatingChainName}',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
         if (flutterBirdController.isAuthenticated)
@@ -116,7 +116,7 @@ class _AuthenticationPopupState extends State<AuthenticationPopup> {
           ),
         if (flutterBirdController.isAuthenticated)
           Text(
-            "Wallet address:\n" + (flutterBirdController.authenticatedAccount?.address ?? ""),
+            'Wallet address:\n' + (flutterBirdController.authenticatedAccount?.address ?? ''),
             style: Theme.of(context).textTheme.bodyLarge,
           )
       ],
@@ -139,7 +139,7 @@ class _AuthenticationPopupState extends State<AuthenticationPopup> {
           height: 40,
           child: Center(
             child: Text(
-              web3Service.isAuthenticated ? "Disconnect" : "Connect",
+              web3Service.isAuthenticated ? 'Disconnect' : 'Connect',
               style: Theme.of(context).textTheme.button?.copyWith(color: Colors.white),
             ),
           ),

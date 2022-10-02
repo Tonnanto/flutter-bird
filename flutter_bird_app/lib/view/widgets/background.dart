@@ -12,7 +12,7 @@ class Background extends StatelessWidget {
             child: Container(
               decoration: const BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage("images/skyline.png"), fit: BoxFit.fitWidth, alignment: Alignment.bottomCenter),
+                      image: AssetImage('images/skyline.png'), fit: BoxFit.fitWidth, alignment: Alignment.bottomCenter),
                   color: Color.fromARGB(255, 84, 192, 201)),
             )),
         Expanded(
@@ -20,7 +20,7 @@ class Background extends StatelessWidget {
             child: Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage("images/floor.png"),
+                  image: AssetImage('images/floor.png'),
                   fit: BoxFit.cover,
                   alignment: Alignment.topCenter,
                 ),

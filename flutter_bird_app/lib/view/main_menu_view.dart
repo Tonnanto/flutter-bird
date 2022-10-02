@@ -122,7 +122,7 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
                     ),
                   if (lastScore != 0)
                     FlappyText(
-                      text: "$lastScore",
+                      text: '$lastScore',
                     ),
                   const Spacer(
                     flex: 4,
@@ -135,7 +135,7 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
                     FlappyText(
                       fontSize: 32,
                       strokeWidth: 2.8,
-                      text: "High Score $highScore",
+                      text: 'High Score $highScore',
                     ),
                   const Spacer(
                     flex: 1,
@@ -151,7 +151,7 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
 
   Widget _buildTitle() => const FlappyText(
         fontSize: 72,
-        text: "FlutterBird",
+        text: 'FlutterBird',
       );
 
   Widget _buildPlayButton() => GestureDetector(
@@ -252,9 +252,9 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
       );
 
   _buildAuthenticationView(FlutterBirdController web3Service) {
-    String statusText = "No Wallet\nConnected";
+    String statusText = 'No Wallet\nConnected';
     if (web3Service.isAuthenticated) {
-      statusText = web3Service.isOnOperatingChain ? "Wallet Connected" : "Wallet on wrong chain";
+      statusText = web3Service.isOnOperatingChain ? 'Wallet Connected' : 'Wallet on wrong chain';
     }
 
     return SafeArea(
@@ -281,7 +281,7 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
                     ]),
                     child: Center(
                       child:
-                          kIsWeb ? Image.network("images/walletconnect.png") : Image.asset("images/walletconnect.png"),
+                          kIsWeb ? Image.network('images/walletconnect.png') : Image.asset('images/walletconnect.png'),
                     ),
                   ),
                   const SizedBox(
@@ -299,7 +299,7 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
                       ),
                       if (web3Service.isAuthenticated)
                         Text(
-                          web3Service.currentAddressShort ?? "",
+                          web3Service.currentAddressShort ?? '',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
                         )
                     ],

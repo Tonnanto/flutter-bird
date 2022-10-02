@@ -35,10 +35,10 @@ class PersistenceService {
   PersistenceService._init({required this.repository});
 
   Repository repository;
-  final String separatorPattern = ", ";
+  final String separatorPattern = ', ';
 
   // keys
-  final String highScoreKey = "flutter_bird.high_score";
+  final String highScoreKey = 'flutter_bird.high_score';
 
   Future<void> saveHighScore(int highScore) async {
     repository.saveInt(highScoreKey, highScore);

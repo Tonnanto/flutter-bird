@@ -19,7 +19,7 @@ class FlappyText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Replace 0 and 1 because they look like 8 and 7
-    String text = this.text.replaceAll("1", "l").replaceAll("0", "O");
+    String text = this.text.replaceAll('1', 'l').replaceAll('0', 'O');
     return Stack(
         // Workaround: Two Texts to give title outline + shadow
         children: [
