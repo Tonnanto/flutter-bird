@@ -57,7 +57,7 @@ It has been deployed on the Ethereum Testnet "Goerli".
 ![Flutter Bird Demo](media/demo.gif)
 
 
-## Build and Run Locally
+## Build and Run Locally (Flutter App)
 
 ### Prerequisites:
 - [Install Flutter](https://docs.flutter.dev/get-started/install)
