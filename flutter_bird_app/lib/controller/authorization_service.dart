@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter_bird/config.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:web3dart/web3dart.dart';
@@ -88,5 +89,5 @@ class AuthorizationServiceImpl implements AuthorizationService {
     return null;
   }
 
-  String _ipfsUriToGateway(String ipfsUri) => "https://nftstorage.link/ipfs/" + ipfsUri.substring(7);
+  String _ipfsUriToGateway(String ipfsUri) => ipfsGatewayUrl + ipfsUri.substring(7);
 }

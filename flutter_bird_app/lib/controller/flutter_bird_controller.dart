@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bird/controller/authentication_service.dart';
 import 'package:flutter_bird/controller/authorization_service.dart';
+import 'package:flutter_bird/config.dart';
 import 'package:flutter_bird/secrets.dart';
 
 import '../model/account.dart';
@@ -34,9 +35,8 @@ class FlutterBirdController extends ChangeNotifier {
 
   init() {
     // Setting Up Web3 Connection
-    const int chainId = 5; // Goerli Testnet
     const String skinContractAddress = flutterBirdSkinsContractAddress;
-    String rpcUrl = "https://eth-goerli.g.alchemy.com/v2/$alchemyApiKey";
+    String rpcUrl = alchemyNodeProviderUrl + alchemyApiKey;
 
     _authenticationService = AuthenticationServiceImpl(
         operatingChain: chainId,

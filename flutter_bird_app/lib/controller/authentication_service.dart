@@ -10,6 +10,7 @@ import 'package:walletconnect_dart/walletconnect_dart.dart';
 
 import '../../model/account.dart';
 import '../../model/wallet_provider.dart';
+import '../config.dart';
 
 /// Manages the authentication process and communication with crypto wallets
 abstract class AuthenticationService {
@@ -88,7 +89,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
       await _connector?.createSession(
           chainId: operatingChain,
           onDisplayUri: (uri) async {
-            // Launches Wallet App (Metamask)
+            // Launches Wallet App
             if (kIsWeb) {
               webQrData = uri;
               onAuthStatusChanged();
@@ -148,13 +149,13 @@ class AuthenticationServiceImpl implements AuthenticationService {
   _createConnector({WalletProvider? walletProvider}) async {
     // Create WalletConnect Connector
     _connector = WalletConnect(
-      bridge: 'https://bridge.walletconnect.org',
+      bridge: walletConnectBridge,
       clientMeta: const PeerMeta(
         name: 'Flutter Bird',
         description: 'WalletConnect Developer App',
         url: 'https://flutterbird.com',
         icons: [
-          'https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media' // TODO
+          "https://raw.githubusercontent.com/Tonnanto/flutter-bird/v1.0/flutter_bird_app/assets/icon.png",
         ],
       ),
     );
