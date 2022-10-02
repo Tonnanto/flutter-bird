@@ -5,7 +5,7 @@ function getRandomWeightedTrait(traitList, guaranteed = false) {
 
     // Calculate total weights
     let totalWeight = 0;
-    traitList.forEach(function(trait) {
+    traitList.forEach(function (trait) {
         if (!guaranteed || (trait.name !== "none" && trait.name !== "default")) {
             totalWeight += trait.weight
         }
@@ -86,4 +86,4 @@ function generateMetadata(tokenId) {
     return skinMetadata;
 }
 
-module.exports = { generateMetadata }
+module.exports = {generateMetadata}

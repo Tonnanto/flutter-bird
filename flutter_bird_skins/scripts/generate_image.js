@@ -1,6 +1,5 @@
-
-const  fs = require("fs");
-const { createCanvas, loadImage } = require("canvas");
+const fs = require("fs");
+const {createCanvas, loadImage} = require("canvas");
 
 const imageSize = {
     width: 750,
@@ -58,4 +57,4 @@ async function generateImage(tokenId, bird, head, eyes, mouth, neck) {
     return filePath;
 }
 
-module.exports = { generateImage }
+module.exports = {generateImage}

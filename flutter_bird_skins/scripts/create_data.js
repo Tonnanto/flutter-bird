@@ -1,6 +1,5 @@
-
-const {generateImage} = require ("./generate_image")
-const {generateMetadata} = require ("./generate_metadata")
+const {generateImage} = require("./generate_image")
+const {generateMetadata} = require("./generate_metadata")
 
 // Test data generation
 for (let tokenId = 0; tokenId < 1000; tokenId++) {
