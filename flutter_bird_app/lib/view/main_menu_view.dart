@@ -1,10 +1,9 @@
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bird/view/authentication_popup.dart';
 import 'package:provider/provider.dart';
+import 'package:web3modal_flutter/web3modal_flutter.dart';
 
 import '../controller/flutter_bird_controller.dart';
 import '../controller/persistence/persistence_service.dart';
@@ -261,81 +260,26 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
       );
 
   _buildAuthenticationView(FlutterBirdController web3Service) {
-    String statusText = 'No Wallet\nConnected';
-    if (web3Service.isAuthenticated) {
-      statusText = web3Service.isOnOperatingChain ? 'Wallet Connected' : 'Wallet on wrong chain';
-    }
-
     return SafeArea(
-      child: GestureDetector(
-        onTap: _showAuthenticationPopUp,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              bottom: 20,
-              left: 32,
-              child: Row(
-                children: [
-                  Container(
-                    height: 64,
-                    width: 64,
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.white, boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(2, 2),
-                      )
-                    ]),
-                    child: Center(
-                      child:
-                          kIsWeb ? Image.network('images/walletconnect.png') : Image.asset('images/walletconnect.png'),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        statusText,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      if (web3Service.isAuthenticated)
-                        Text(
-                          web3Service.currentAddressShort ?? '',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
-                        )
-                    ],
-                  )
-                ],
-              ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            bottom: 20,
+            left: 32,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!web3Service.isAuthenticated)
+                  W3MConnectWalletButton(service: web3Service.walletConnectService),
+                if (web3Service.isAuthenticated)
+                  W3MAccountButton(service: web3Service.walletConnectService),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
-  }
-
-  _showAuthenticationPopUp() {
-    Navigator.of(context).push(PageRouteBuilder(
-      opaque: false,
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-        return const AuthenticationPopup();
-      },
-      transitionDuration: const Duration(milliseconds: 150),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
-      },
-    ));
   }
 
   @override

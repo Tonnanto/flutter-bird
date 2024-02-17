@@ -1,25 +1,23 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bird/controller/authentication_service.dart';
 import 'package:flutter_bird/controller/authorization_service.dart';
 import 'package:flutter_bird/config.dart';
 import 'package:flutter_bird/secrets.dart';
+import 'package:web3modal_flutter/web3modal_flutter.dart';
 
 import '../model/account.dart';
 import '../model/skin.dart';
-import '../model/wallet_provider.dart';
 
 class FlutterBirdController extends ChangeNotifier {
   late final AuthenticationService _authenticationService;
   late final AuthorizationService _authorizationService;
+  W3MService get walletConnectService => _authenticationService.w3mService;
 
   // Authentication state
-  List<WalletProvider> get availableWallets => _authenticationService.availableWallets;
-
   Account? get authenticatedAccount => _authenticationService.authenticatedAccount;
 
   bool get isOnOperatingChain => _authenticationService.isOnOperatingChain;
-
-  String get operatingChainName => _authenticationService.operatingChainName;
 
   bool get isAuthenticated => _authenticationService.isAuthenticated;
 
@@ -39,16 +37,12 @@ class FlutterBirdController extends ChangeNotifier {
     String rpcUrl = alchemyNodeProviderUrl + alchemyApiKey;
 
     _authenticationService = AuthenticationServiceImpl(
-        operatingChain: chainId,
+        operatingChainId: chainId,
         onAuthStatusChanged: () async {
           notifyListeners();
           authorizeUser();
         });
     _authorizationService = AuthorizationServiceImpl(contractAddress: skinContractAddress, rpcUrl: rpcUrl);
-  }
-
-  requestAuthentication({WalletProvider? walletProvider}) {
-    _authenticationService.requestAuthentication(walletProvider: walletProvider);
   }
 
   unauthenticate() {
