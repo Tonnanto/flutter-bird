@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_bird/secrets.dart';
 import 'package:http/http.dart' as http;
 import 'package:nonce/nonce.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -75,9 +76,9 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
   /// Loads all WalletConnect compatible wallets
   _loadWallets() async {
-    final walletResponse = await http.get(Uri.parse('https://registry.walletconnect.org/data/wallets.json'));
+    final walletResponse = await http.get(Uri.parse('https://explorer-api.walletconnect.com/v3/wallets?projectId=$walletConnectProjectID'));
     final walletData = json.decode(walletResponse.body);
-    availableWallets = walletData.entries.map<WalletProvider>((data) => WalletProvider.fromJson(data.value)).toList();
+    availableWallets = walletData['listings'].entries.map<WalletProvider>((data) => WalletProvider.fromJson(data.value)).toList();
   }
 
   /// Prompts user to authenticate with a wallet

@@ -63,6 +63,15 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
             }
             setState(() {});
           }),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        // only use opacity fade animation on pop
+        if (animation.status != AnimationStatus.reverse) return child;
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      transitionDuration: Duration(milliseconds: 1300)
     ));
   }
 
