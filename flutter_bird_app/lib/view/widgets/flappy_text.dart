@@ -28,6 +28,8 @@ class FlappyText extends StatelessWidget {
             style: TextStyle(
                 fontFamily: 'flappy',
                 fontSize: fontSize ?? 64,
+                height: 1,
+                wordSpacing: -8,
                 fontWeight: fontWeight ?? FontWeight.w500,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
@@ -43,6 +45,8 @@ class FlappyText extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'flappy',
               fontSize: fontSize ?? 64,
+              height: 1,
+              wordSpacing: -8,
               fontWeight: fontWeight ?? FontWeight.w500,
               color: Colors.white,
             ),
