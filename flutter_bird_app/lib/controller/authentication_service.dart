@@ -80,7 +80,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
         url: 'https://anton.stamme.de/flutterbird/',
         icons: ['https://raw.githubusercontent.com/Tonnanto/flutter-bird/v1.0/flutter_bird_app/assets/icon.png'],
         redirect: Redirect(
-          native: 'web3modalflutter://', // TODO: configure redirect to flutter bird app
+          native: 'flutter_bird://', // TODO: configure redirect to flutter bird app
           universal: 'https://web3modal.com',
         ),
       ),
@@ -89,39 +89,43 @@ class AuthenticationServiceImpl implements AuthenticationService {
     await _w3mService.init();
 
     // Subscribe to events
-    _w3mService.onSessionConnectEvent.subscribe((SessionConnect? args) async {
-      log('connected: ' + (args?.session.topic ?? ""), name: 'AuthenticationService');
-      webQrData = null;
-      final authenticated = await _verifySignature();
-      if (authenticated) log('authenticated successfully', name: 'AuthenticationService');
-      onAuthStatusChanged();
-    });
-    _w3mService.onSessionUpdateEvent.subscribe((SessionUpdate? args) async {
-      log('session_update: ' + (args?.topic ?? ""), name: 'AuthenticationService');
-      webQrData = null;
-      onAuthStatusChanged();
-    });
-    _w3mService.onSessionDeleteEvent.subscribe((SessionDelete? args) {
-      log('disconnect: ' + (args?.topic ?? ""), name: 'AuthenticationService');
-      webQrData = null;
-      _authenticatedAccount = null;
-      onAuthStatusChanged();
-    });
+    _w3mService.onSessionEventEvent.subscribe(_onSessionEvent);
+    _w3mService.onSessionConnectEvent.subscribe(_onSessionConnect);
+    _w3mService.onSessionUpdateEvent.subscribe(_onSessionUpdate);
+    _w3mService.onSessionDeleteEvent.subscribe(_onSessionDelete);
+  }
+
+  void _onSessionEvent(SessionEvent? args) {
+    log('session event: ' + (args?.name ?? ""), name: 'AuthenticationService');
+  }
+
+  void _onSessionUpdate(SessionUpdate? args) {
+    log('session update', name: 'AuthenticationService');
+    webQrData = null;
+    onAuthStatusChanged();
+  }
+
+  void _onSessionConnect(SessionConnect? args) async {
+    log('session connect', name: 'AuthenticationService');
+    webQrData = null;
+    final authenticated = await _verifySignature();
+    if (authenticated) log('authenticated successfully', name: 'AuthenticationService');
+    onAuthStatusChanged();
+  }
+
+  void _onSessionDelete(SessionDelete? args) {
+    log('session delete', name: 'AuthenticationService');
+    webQrData = null;
+    _authenticatedAccount = null;
+    onAuthStatusChanged();
   }
 
   /// Send request to the users wallet to sign a message
   /// User will be authenticated if the signature could be verified
   Future<bool> _verifySignature() async {
-    String? address = w3mService.session?.getAccounts()?.first.split(':').last;
+    String? address = w3mService.session?.address;
     if (address == null) return false;
-
-    if (!kIsWeb) {
-      // Launch wallet app if on mobile
-      // Delay to make sure FlutterBird is in foreground before launching wallet app again
-      await Future.delayed(const Duration(seconds: 1));
-      _w3mService.launchConnectedWallet();
-    }
-
+    log('Address found: $address', name: 'AuthenticationService');
     log('Signing message...', name: 'AuthenticationService');
 
     // Let Crypto Wallet sign custom message
@@ -134,10 +138,13 @@ class AuthenticationServiceImpl implements AuthenticationService {
           messageText,
           address,
         ]));
+    log('Signature received: $signature', name: 'AuthenticationService');
 
     // Check if signature is valid by recovering the exact address from message and signature
     String recoveredAddress = EthSigUtil.recoverPersonalSignature(
         signature: signature, message: Uint8List.fromList(utf8.encode(messageText)));
+    log('Recovered address: $recoveredAddress', name: 'AuthenticationService');
+    log('Actual address:    $address', name: 'AuthenticationService');
 
     // if initial address and recovered address are identical the message has been signed with the correct private key
     bool isAuthenticated = recoveredAddress.toLowerCase() == address.toLowerCase();

@@ -261,8 +261,10 @@ class _MainMenuViewState extends State<MainMenuView> with AutomaticKeepAliveClie
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                W3MConnectWalletButton(service: web3Service.walletConnectService),
-                W3MAccountButton(service: web3Service.walletConnectService),
+                if (!web3Service.isAuthenticated)
+                  W3MConnectWalletButton(service: web3Service.walletConnectService),
+                if (web3Service.isAuthenticated)
+                  W3MAccountButton(service: web3Service.walletConnectService),
               ],
             ),
           ),
